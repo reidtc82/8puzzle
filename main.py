@@ -1,26 +1,23 @@
-import tkinter as tk
+from tkinter import Tk, Label, Button
 
-# Singleton class as main of program
 class Main:
-    msg = 'This is main.'
+    def __init__(self, master):
+        self.master = master
+        master.title("8 Puzzle")
+        master.geometry('640x480')
 
-    class __Main:
-        def __init__(self, arg):
-            self.val = arg
-        def __str__(self):
-            return repr(self) + self.val
-    instance = None
-    def __init__(self, arg):
-        if not Main.instance:
-            Main.instance = Main.__Main(arg)
-        else:
-            Main.instance.val = arg
-    def __getattr__(self, name):
-        return getattr(self.instance, name)
+        self.label = Label(master, text="This is our first GUI!")
+        self.label.pack()
 
-    def __run__(self, arg):
-        print(arg)
+        self.greet_button = Button(master, text="Greet", command=self.greet)
+        self.greet_button.pack()
 
-m = Main('Im Main')
+        self.close_button = Button(master, text="Close", command=master.quit)
+        self.close_button.pack()
 
-m.__run__('Hello')
+    def greet(self):
+        print("Greetings!")
+
+root = Tk()
+mainPanel = Main(root)
+root.mainloop()
