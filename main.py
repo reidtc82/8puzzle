@@ -4,6 +4,8 @@ import numpy as np
 
 class Main:
     def __init__(self, master):
+        self.board = PuzzleBoard()
+
         self.master = master
         master.title("8 Puzzle")
         master.geometry('640x480')
@@ -11,18 +13,16 @@ class Main:
         self.label = Label(master, text="This is our first GUI!")
         self.label.pack()
 
-        self.greet_button = Button(master, text="Reset Puzzle", command=self.resetPuzzle)
+        self.greet_button = Button(master, text="Reset Puzzle", command=self.board.resetPuzzle)
         self.greet_button.pack()
 
         self.close_button = Button(master, text="Close", command=master.quit)
         self.close_button.pack()
 
-        self.board = PuzzleBoard()
-
-    def resetPuzzle(self):
-        self.board.resetState()
-        currentState = np.asarray(self.board.getState())
-        print(currentState)
+    # def resetPuzzle(self):
+    #     self.board.resetState()
+    #     currentState = np.asarray(self.board.getState())
+    #     print(currentState[0].getValue())
 
 root = Tk()
 mainPanel = Main(root)

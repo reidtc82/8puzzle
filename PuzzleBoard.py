@@ -1,15 +1,20 @@
 import numpy as np
-import Tile as tile
+from Tile import Tile
 
 class PuzzleBoard:
+    tiles = [0] *9
     def __init__(self):
-        self.tiles = np.arange(9).reshape(3, 3)
+        for i in range(9):
+            self.tiles[i] = Tile(i)
+        self.tiles = np.asarray(self.tiles).reshape(3, 3)
 
     def getState(self):
         return self.tiles
 
-    def resetState(self):
+    def resetPuzzle(self):
         print("Resetting tiles!")
-        self.tiles = np.arange(9).reshape(3, 3)
-        np.random.shuffle(self.tiles.ravel())
-        self.tiles.reshape(3,3)
+        temp = self.tiles.ravel()
+        np.random.shuffle(temp)
+        self.tiles = temp.reshape(3, 3)
+
+        print(self.tiles[0][0].getValue())
