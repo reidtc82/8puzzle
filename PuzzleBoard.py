@@ -7,8 +7,12 @@ class PuzzleBoard:
 
     def __init__(self):
         for i in range(9):
-            self.tiles[i] = Tile(i)
-            self.winningState[i] = Tile(i)
+            if i != 0:
+                self.tiles[i] = Tile(i)
+                self.winningState[i] = Tile(i)
+            else:
+                self.tiles[i] = None
+                self.winningState[i] = None
 
         self.tiles = np.asarray(self.tiles).reshape(3, 3)
         self.winningState = np.asarray(self.winningState).reshape(3,3)
@@ -24,7 +28,10 @@ class PuzzleBoard:
 
         for i in range(3):
             for j in range(3):
-                print(self.tiles[i][j].getValue())
+                if self.tiles[i][j] != None:
+                    print(self.tiles[i][j].getValue())
+                else:
+                    print(self.tiles[i][j])
 
     def moveUp(self):
         print('up')
