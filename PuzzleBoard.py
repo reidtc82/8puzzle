@@ -1,4 +1,5 @@
 import numpy as np
+import Tile as tile
 
 class PuzzleBoard:
     def __init__(self):

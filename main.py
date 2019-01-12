@@ -24,7 +24,6 @@ class Main:
         currentState = np.asarray(self.board.getState())
         print(currentState)
 
-
 root = Tk()
 mainPanel = Main(root)
 root.mainloop()
