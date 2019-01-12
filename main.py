@@ -1,9 +1,13 @@
-from tkinter import Tk, Label, Button
+from tkinter import Tk, Label, Button, Canvas
 from PuzzleBoard import PuzzleBoard
 import numpy as np
 
 class Main:
     def __init__(self, master):
+        self.canvas_width = 300
+        self.canvas_height = 300
+        self.rectangles = [0] *9
+
         self.board = PuzzleBoard()
 
         self.master = master
@@ -13,7 +17,13 @@ class Main:
         self.label = Label(master, text="This is 8 Puzzle")
         self.label.pack()
 
-        self.resetPuzzle_button = Button(master, text="Reset Puzzle", command=self.board.resetPuzzle)
+        self.canvasSpace = Canvas(master, width=self.canvas_width, height=self.canvas_height)
+        self.canvasSpace.pack()
+
+        self.canvasSpace.create_rectangle(0, 0, 300, 300, fill="#696969")
+        self.drawBoard(self.canvasSpace)
+
+        self.resetPuzzle_button = Button(master, text="Reset Puzzle", command=self.newPuzzle)
         self.resetPuzzle_button.pack()
 
         self.close_button = Button(master, text="Close", command=master.quit)
@@ -31,6 +41,24 @@ class Main:
         self.right_button = Button(master, text="Right", command=self.board.moveRight)
         self.right_button.pack()
 
+    def newPuzzle(self):
+        print('hello')
+        self.board.resetPuzzle()
+        self.drawBoard(self.canvasSpace)
+
+    def drawBoard(self, canvas):
+        for rec in self.rectangles:
+            canvas.delete(rec)
+
+        currentState = self.board.getState()
+        for i in range(3):
+            for j in range(3):
+                if currentState[i][j] != None:
+                    origin_X = 100*i
+                    origin_Y = 100*j
+                    final_X = origin_X+100
+                    final_Y = origin_Y+100
+                    self.rectangles.append(canvas.create_rectangle(origin_X, origin_Y, final_X, final_Y, fill="#DCDCDC"))
 
 root = Tk()
 mainPanel = Main(root)
