@@ -17,4 +17,6 @@ class PuzzleBoard:
         np.random.shuffle(temp)
         self.tiles = temp.reshape(3, 3)
 
-        print(self.tiles[0][0].getValue())
+        for i in range(3):
+            for j in range(3):
+                print(self.tiles[i][j].getValue())
