@@ -1,4 +1,6 @@
 from tkinter import Tk, Label, Button
+from PuzzleBoard import PuzzleBoard
+import numpy as np
 
 class Main:
     def __init__(self, master):
@@ -9,14 +11,19 @@ class Main:
         self.label = Label(master, text="This is our first GUI!")
         self.label.pack()
 
-        self.greet_button = Button(master, text="Greet", command=self.greet)
+        self.greet_button = Button(master, text="Reset Puzzle", command=self.resetPuzzle)
         self.greet_button.pack()
 
         self.close_button = Button(master, text="Close", command=master.quit)
         self.close_button.pack()
 
-    def greet(self):
-        print("Greetings!")
+        self.board = PuzzleBoard(np.arange(9).reshape(3, 3))
+
+    def resetPuzzle(self):
+        self.board.resetState()
+        currentState = np.asarray(self.board.getState())
+        print(currentState)
+
 
 root = Tk()
 mainPanel = Main(root)
