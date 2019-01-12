@@ -1,8 +1,8 @@
 import numpy as np
 
 class PuzzleBoard:
-    def __init__(self,tiles):
-        self.tiles = tiles
+    def __init__(self):
+        self.tiles = np.arange(9).reshape(3, 3)
 
     def getState(self):
         return self.tiles

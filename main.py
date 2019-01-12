@@ -17,7 +17,7 @@ class Main:
         self.close_button = Button(master, text="Close", command=master.quit)
         self.close_button.pack()
 
-        self.board = PuzzleBoard(np.arange(9).reshape(3, 3))
+        self.board = PuzzleBoard()
 
     def resetPuzzle(self):
         self.board.resetState()
