@@ -16,6 +16,8 @@ class PuzzleBoard:
 
         self.tiles = np.asarray(self.tiles).reshape(3, 3)
         self.winningState = np.asarray(self.winningState).reshape(3,3)
+        self.getZeroLocation()
+        print(self.getZeroLocation())
 
     def getState(self):
         return self.tiles
@@ -25,6 +27,8 @@ class PuzzleBoard:
         temp = self.tiles.ravel()
         np.random.shuffle(temp)
         self.tiles = temp.reshape(3, 3)
+        self.zero_location = self.getZeroLocation()
+        print(self.getZeroLocation())
 
         for i in range(3):
             for j in range(3):
@@ -33,8 +37,28 @@ class PuzzleBoard:
                 else:
                     print(self.tiles[i][j])
 
+    def getZeroLocation(self):
+        for i in range(3):
+            for j in range(3):
+                if self.tiles[i][j] == None:
+                    self.zero_location = {'col':i,'row':j}
+        return self.zero_location
+
+    def setZeroLocation(self, newLoc):
+        self.zero_location = newLoc
+
     def moveUp(self):
         print('up')
+        tempLoc = self.getZeroLocation()
+        if tempLoc['row'] != 0:
+            print('moving up')
+            aboveTile = self.tiles[tempLoc['row']-1][tempLoc['col']]
+            self.tiles[tempLoc['col']][tempLoc['row']-1] = None
+            self.setZeroLocation({'col':tempLoc['col'],'row':tempLoc['row']-1})
+            self.tiles[tempLoc['col']][tempLoc['row']] = aboveTile
+        else:
+            print('cant move')
+            print(self.getZeroLocation())
         return self.checkWin()
 
     def moveDown(self):
@@ -50,4 +74,6 @@ class PuzzleBoard:
         return self.checkWin()
 
     def checkWin(self):
-        return np.array_equal(self.tiles, self.winningState)
+        if np.array_equal(self.tiles, self.winningState):
+            print('You win')
+            return True
