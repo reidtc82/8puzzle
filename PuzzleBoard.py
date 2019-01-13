@@ -15,6 +15,7 @@ class PuzzleBoard:
                 self.winningState[i] = None
 
         self.tiles = np.asarray(self.tiles).reshape(3, 3)
+        self.resetPuzzle()
         self.winningState = np.asarray(self.winningState).reshape(3,3)
         self.getZeroLocation()
         print(self.getZeroLocation())
@@ -47,6 +48,34 @@ class PuzzleBoard:
     def setZeroLocation(self, newLoc):
         self.zero_location = newLoc
 
+    def moveLeft(self):
+        print('left')
+        tempLoc = self.getZeroLocation()
+        if tempLoc['col'] != 0:
+            print('moving left')
+            leftTile = self.tiles[tempLoc['row']][tempLoc['col']-1]
+            self.tiles[tempLoc['col']-1][tempLoc['row']] = None
+            self.setZeroLocation({'col':tempLoc['col']-1,'row':tempLoc['row']})
+            self.tiles[tempLoc['col']][tempLoc['row']] = leftTile
+        else:
+            print('cant move')
+            print(self.getZeroLocation())
+        return self.checkWin()
+
+    def moveRight(self):
+        print('right')
+        tempLoc = self.getZeroLocation()
+        if tempLoc['col'] != 2:
+            print('moving right')
+            rightTile = self.tiles[tempLoc['row']][tempLoc['col']+1]
+            self.tiles[tempLoc['col']+1][tempLoc['row']] = None
+            self.setZeroLocation({'col':tempLoc['col']+1,'row':tempLoc['row']})
+            self.tiles[tempLoc['col']][tempLoc['row']] = rightTile
+        else:
+            print('cant move')
+            print(self.getZeroLocation())
+        return self.checkWin()
+
     def moveUp(self):
         print('up')
         tempLoc = self.getZeroLocation()
@@ -63,14 +92,16 @@ class PuzzleBoard:
 
     def moveDown(self):
         print('down')
-        return self.checkWin()
-
-    def moveLeft(self):
-        print('left')
-        return self.checkWin()
-
-    def moveRight(self):
-        print('right')
+        tempLoc = self.getZeroLocation()
+        if tempLoc['row'] != 2:
+            print('moving down')
+            belowTile = self.tiles[tempLoc['row']+1][tempLoc['col']]
+            self.tiles[tempLoc['col']][tempLoc['row']+1] = None
+            self.setZeroLocation({'col':tempLoc['col'],'row':tempLoc['row']+1})
+            self.tiles[tempLoc['col']][tempLoc['row']] = belowTile
+        else:
+            print('cant move')
+            print(self.getZeroLocation())
         return self.checkWin()
 
     def checkWin(self):

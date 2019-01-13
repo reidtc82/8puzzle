@@ -32,14 +32,26 @@ class Main:
         self.up_button = Button(master, text="Up", command=self.moveUp)
         self.up_button.pack()
 
-        self.down_button = Button(master, text="Down", command=self.board.moveDown)
+        self.down_button = Button(master, text="Down", command=self.moveDown)
         self.down_button.pack()
 
-        self.left_button = Button(master, text="Left", command=self.board.moveLeft)
+        self.left_button = Button(master, text="Left", command=self.moveLeft)
         self.left_button.pack()
 
-        self.right_button = Button(master, text="Right", command=self.board.moveRight)
+        self.right_button = Button(master, text="Right", command=self.moveRight)
         self.right_button.pack()
+
+    def moveRight(self):
+        self.board.moveRight()
+        self.drawBoard(self.canvasSpace)
+
+    def moveLeft(self):
+        self.board.moveLeft()
+        self.drawBoard(self.canvasSpace)
+
+    def moveDown(self):
+        self.board.moveDown()
+        self.drawBoard(self.canvasSpace)
 
     def moveUp(self):
         self.board.moveUp()
