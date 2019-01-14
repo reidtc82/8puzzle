@@ -7,22 +7,17 @@ class PuzzleBoard:
 
     def __init__(self):
         for i in range(9):
-            if i != 0:
-                self.tiles[i] = Tile(i)
-                # self.winningState[i] = Tile(i)
-            else:
-                self.tiles[i] = None
-                # self.winningState[i] = None
+            self.tiles[i] = i
 
-        self.winningState[0] = Tile(1)
-        self.winningState[1] = Tile(8)
-        self.winningState[2] = Tile(7)
-        self.winningState[3] = Tile(2)
-        self.winningState[4] = None
-        self.winningState[5] = Tile(6)
-        self.winningState[6] = Tile(3)
-        self.winningState[7] = Tile(4)
-        self.winningState[8] = Tile(5)
+        self.winningState[0] = 1
+        self.winningState[1] = 8
+        self.winningState[2] = 7
+        self.winningState[3] = 2
+        self.winningState[4] = 0
+        self.winningState[5] = 6
+        self.winningState[6] = 3
+        self.winningState[7] = 4
+        self.winningState[8] = 5
 
         self.tiles = np.asarray(self.tiles).reshape(3, 3)
         self.resetPuzzle()
@@ -43,17 +38,18 @@ class PuzzleBoard:
         self.printState(self.tiles)
 
     def printState(self, state):
-        for i in range(3):
-            for j in range(3):
-                if state[i][j] != None:
-                    print(state[i][j].getValue())
-                else:
-                    print(state[i][j])
+        print(state)
+        # for i in range(3):
+        #     for j in range(3):
+        #         if state[i][j] != 0:
+        #             print(state[i][j])
+        #         else:
+        #             print(state[i][j])
 
     def getZeroLocation(self):
         for i in range(3):
             for j in range(3):
-                if self.tiles[i][j] == None:
+                if self.tiles[i][j] == 0:
                     self.zero_location = {'col':i,'row':j}
         return self.zero_location
 
@@ -66,7 +62,7 @@ class PuzzleBoard:
         if tempLoc['col'] != 0:
             print('moving left')
             leftTile = self.tiles[tempLoc['col']-1][tempLoc['row']]
-            self.tiles[tempLoc['col']-1][tempLoc['row']] = None
+            self.tiles[tempLoc['col']-1][tempLoc['row']] = 0
             self.setZeroLocation({'col':tempLoc['col']-1,'row':tempLoc['row']})
             self.tiles[tempLoc['col']][tempLoc['row']] = leftTile
         else:
@@ -82,7 +78,7 @@ class PuzzleBoard:
         if tempLoc['col'] != 2:
             print('moving right')
             rightTile = self.tiles[tempLoc['col']+1][tempLoc['row']]
-            self.tiles[tempLoc['col']+1][tempLoc['row']] = None
+            self.tiles[tempLoc['col']+1][tempLoc['row']] = 0
             self.setZeroLocation({'col':tempLoc['col']+1,'row':tempLoc['row']})
             self.tiles[tempLoc['col']][tempLoc['row']] = rightTile
         else:
@@ -98,7 +94,7 @@ class PuzzleBoard:
         if tempLoc['row'] != 0:
             print('moving up')
             aboveTile = self.tiles[tempLoc['col']][tempLoc['row']-1]
-            self.tiles[tempLoc['col']][tempLoc['row']-1] = None
+            self.tiles[tempLoc['col']][tempLoc['row']-1] = 0
             self.setZeroLocation({'col':tempLoc['col'],'row':tempLoc['row']-1})
             self.tiles[tempLoc['col']][tempLoc['row']] = aboveTile
         else:
@@ -114,7 +110,7 @@ class PuzzleBoard:
         if tempLoc['row'] != 2:
             print('moving down')
             belowTile = self.tiles[tempLoc['col']][tempLoc['row']+1]
-            self.tiles[tempLoc['col']][tempLoc['row']+1] = None
+            self.tiles[tempLoc['col']][tempLoc['row']+1] = 0
             self.setZeroLocation({'col':tempLoc['col'],'row':tempLoc['row']+1})
             self.tiles[tempLoc['col']][tempLoc['row']] = belowTile
         else:
@@ -130,10 +126,5 @@ class PuzzleBoard:
         print('\n')
         print('winning state')
         self.printState(self.winningState)
-        youWin = True
-        for i in range(3):
-            for j in range(3):
-                if self.tiles[i][j] and self.winningState[i][j]:
-                    if self.tiles[i][j].getValue != self.winningState[i][j].getValue:
-                        youWin = False
-        return youWin
+        # print(np.allclose(self.tiles,self.tiles))
+        return np.allclose(self.tiles, self.winningState)
