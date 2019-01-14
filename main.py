@@ -6,7 +6,8 @@ class Main:
     def __init__(self, master):
         self.canvas_width = 300
         self.canvas_height = 300
-        self.rectangles = [0] *9
+        self.rectangles = [0] *8
+        self.texts = [0] *8
 
         self.board = PuzzleBoard()
 
@@ -66,6 +67,9 @@ class Main:
         for rec in self.rectangles:
             canvas.delete(rec)
 
+        for txt in self.texts:
+            canvas.delete(txt)
+
         currentState = self.board.getState()
         for i in range(3):
             for j in range(3):
@@ -75,6 +79,7 @@ class Main:
                     final_X = origin_X+100
                     final_Y = origin_Y+100
                     self.rectangles.append(canvas.create_rectangle(origin_X, origin_Y, final_X, final_Y, fill="#DCDCDC"))
+                    self.texts.append(canvas.create_text(origin_X+50,origin_Y+50,text=currentState[i][j].getValue()))
 
 root = Tk()
 mainPanel = Main(root)
