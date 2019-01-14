@@ -73,13 +73,13 @@ class Main:
         currentState = self.board.getState()
         for i in range(3):
             for j in range(3):
-                if currentState[i][j] != None:
+                if currentState[i][j] != 0:
                     origin_X = 100*i
                     origin_Y = 100*j
                     final_X = origin_X+100
                     final_Y = origin_Y+100
                     self.rectangles.append(canvas.create_rectangle(origin_X, origin_Y, final_X, final_Y, fill="#DCDCDC"))
-                    self.texts.append(canvas.create_text(origin_X+50,origin_Y+50,text=currentState[i][j].getValue()))
+                    self.texts.append(canvas.create_text(origin_X+50,origin_Y+50,text=currentState[i][j]))
 
 root = Tk()
 mainPanel = Main(root)
