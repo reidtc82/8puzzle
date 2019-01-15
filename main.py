@@ -27,6 +27,9 @@ class Main:
         self.label = Label(master, text="This is 8 Puzzle")
         self.label.pack()
 
+        self.score = Label(master, text=self.board.getScore())
+        self.score.pack()
+
         self.canvasSpace = Canvas(master, width=self.canvas_width, height=self.canvas_height)
         self.canvasSpace.pack()
 
@@ -53,23 +56,29 @@ class Main:
 
     def moveRight(self):
         self.board.moveRight()
+        self.score.config(text=self.board.getScore())
         self.drawBoard(self.canvasSpace)
 
     def moveLeft(self):
         self.board.moveLeft()
+        self.score.config(text=self.board.getScore())
         self.drawBoard(self.canvasSpace)
 
     def moveDown(self):
         self.board.moveDown()
+        self.score.config(text=self.board.getScore())
         self.drawBoard(self.canvasSpace)
 
     def moveUp(self):
         self.board.moveUp()
+        self.score.config(text=self.board.getScore())
         self.drawBoard(self.canvasSpace)
 
     def newPuzzle(self):
         print('hello')
         self.board.resetPuzzle()
+        self.board.resetScore()
+        self.score.config(text=self.board.getScore())
         self.drawBoard(self.canvasSpace)
 
     def drawBoard(self, canvas):
