@@ -1,4 +1,13 @@
-from tkinter import Tk, Label, Button, Canvas
+import sys
+if sys.version_info[0] == 3:
+    # for Python3
+    from tkinter import *   ## notice lowercase 't' in tkinter here
+else:
+    # for Python2
+    from Tkinter import *   ## notice capitalized T in Tkinter
+
+# from tkinter import Tk, Label, Button, Canvas
+
 from PuzzleBoard import PuzzleBoard
 import numpy as np
 
