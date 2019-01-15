@@ -1,5 +1,6 @@
 import numpy as np
 from Tile import Tile
+from State import State
 
 class PuzzleBoard:
     tiles = [0] *9
@@ -9,6 +10,10 @@ class PuzzleBoard:
     def __init__(self):
         for i in range(9):
             self.tiles[i] = i
+
+        self.easyStart = State([[1,8,7],[3,6,0],[4,2,5]])
+        self.medStart = State([[2,0,7],[8,4,6],[1,3,5]])
+        self.hardStart = State([[5,4,3],[6,0,2],[7,8,1]])
 
         self.winningState[0] = 1
         self.winningState[1] = 8
