@@ -4,6 +4,7 @@ from Tile import Tile
 class PuzzleBoard:
     tiles = [0] *9
     winningState = [0] *9
+    score = 0
 
     def __init__(self):
         for i in range(9):
@@ -25,6 +26,9 @@ class PuzzleBoard:
         self.getZeroLocation()
         print(self.getZeroLocation())
 
+    def getScore(self):
+        return self.score
+
     def getState(self):
         return self.tiles
 
@@ -36,6 +40,9 @@ class PuzzleBoard:
         self.zero_location = self.getZeroLocation()
         print(self.getZeroLocation())
         self.printState(self.tiles)
+
+    def resetScore(self):
+        self.score = 0
 
     def printState(self, state):
         print(state)
@@ -62,6 +69,7 @@ class PuzzleBoard:
         if tempLoc['col'] != 0:
             print('moving left')
             leftTile = self.tiles[tempLoc['col']-1][tempLoc['row']]
+            self.score += leftTile
             self.tiles[tempLoc['col']-1][tempLoc['row']] = 0
             self.setZeroLocation({'col':tempLoc['col']-1,'row':tempLoc['row']})
             self.tiles[tempLoc['col']][tempLoc['row']] = leftTile
@@ -78,6 +86,7 @@ class PuzzleBoard:
         if tempLoc['col'] != 2:
             print('moving right')
             rightTile = self.tiles[tempLoc['col']+1][tempLoc['row']]
+            self.score += rightTile
             self.tiles[tempLoc['col']+1][tempLoc['row']] = 0
             self.setZeroLocation({'col':tempLoc['col']+1,'row':tempLoc['row']})
             self.tiles[tempLoc['col']][tempLoc['row']] = rightTile
@@ -94,6 +103,7 @@ class PuzzleBoard:
         if tempLoc['row'] != 0:
             print('moving up')
             aboveTile = self.tiles[tempLoc['col']][tempLoc['row']-1]
+            self.score += aboveTile
             self.tiles[tempLoc['col']][tempLoc['row']-1] = 0
             self.setZeroLocation({'col':tempLoc['col'],'row':tempLoc['row']-1})
             self.tiles[tempLoc['col']][tempLoc['row']] = aboveTile
@@ -110,6 +120,7 @@ class PuzzleBoard:
         if tempLoc['row'] != 2:
             print('moving down')
             belowTile = self.tiles[tempLoc['col']][tempLoc['row']+1]
+            self.score += belowTile
             self.tiles[tempLoc['col']][tempLoc['row']+1] = 0
             self.setZeroLocation({'col':tempLoc['col'],'row':tempLoc['row']+1})
             self.tiles[tempLoc['col']][tempLoc['row']] = belowTile
@@ -126,5 +137,7 @@ class PuzzleBoard:
         print('\n')
         print('winning state')
         self.printState(self.winningState)
+        print('\n')
+        print(self.getScore())
         # print(np.allclose(self.tiles,self.tiles))
         return np.allclose(self.tiles, self.winningState)
