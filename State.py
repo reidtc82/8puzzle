@@ -1,8 +1,8 @@
 class State:
-    def __init__(self, state):
+    def __init__(self, state, cost, path):
         self.state = state
-        self.cost = 0
-        self.path = []
+        self.cost = cost
+        self.path = path
 
     def getState(self):
         return self.state
@@ -18,3 +18,10 @@ class State:
 
     def addPath(self,parent):
         self.path.append(parent)
+
+    def getZeroLocation(self):
+        for i in range(3):
+            for j in range(3):
+                if self.state[i][j] == 0:
+                    zero_location = {'col':i,'row':j}
+        return zero_location
