@@ -6,7 +6,9 @@ class PuzzleBoard:
     tiles = [0] *9
     winningState = [0] *9
     score = 0
-
+    visited = []
+    enqueue = []
+    
     def __init__(self):
         for i in range(9):
             self.tiles[i] = i
