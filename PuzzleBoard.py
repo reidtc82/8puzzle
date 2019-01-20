@@ -1,5 +1,6 @@
 import numpy as np
 from Tile import Tile
+from State import State
 
 class PuzzleBoard:
     tiles = [0] *9
@@ -10,19 +11,24 @@ class PuzzleBoard:
         for i in range(9):
             self.tiles[i] = i
 
-        self.winningState[0] = 1
-        self.winningState[1] = 8
-        self.winningState[2] = 7
-        self.winningState[3] = 2
-        self.winningState[4] = 0
-        self.winningState[5] = 6
-        self.winningState[6] = 3
-        self.winningState[7] = 4
-        self.winningState[8] = 5
+        self.easyStart = State([[1,8,7],[3,6,0],[4,2,5]])
+        self.medStart = State([[2,0,7],[8,4,6],[1,3,5]])
+        self.hardStart = State([[5,4,3],[6,0,2],[7,8,1]])
+        self.winningState = State([[1,8,7],[2,0,6],[3,4,5]])
+
+        # self.winningState[0] = 1
+        # self.winningState[1] = 8
+        # self.winningState[2] = 7
+        # self.winningState[3] = 2
+        # self.winningState[4] = 0
+        # self.winningState[5] = 6
+        # self.winningState[6] = 3
+        # self.winningState[7] = 4
+        # self.winningState[8] = 5
 
         self.tiles = np.asarray(self.tiles).reshape(3, 3)
         self.resetPuzzle()
-        self.winningState = np.asarray(self.winningState).reshape(3,3)
+        # self.winningState = np.asarray(self.winningState).reshape(3,3)
         self.getZeroLocation()
         print(self.getZeroLocation())
 
@@ -39,19 +45,10 @@ class PuzzleBoard:
         self.tiles = temp.reshape(3, 3)
         self.zero_location = self.getZeroLocation()
         print(self.getZeroLocation())
-        self.printState(self.tiles)
+        print(self.tiles)
 
     def resetScore(self):
         self.score = 0
-
-    def printState(self, state):
-        print(state)
-        # for i in range(3):
-        #     for j in range(3):
-        #         if state[i][j] != 0:
-        #             print(state[i][j])
-        #         else:
-        #             print(state[i][j])
 
     def getZeroLocation(self):
         for i in range(3):
@@ -133,11 +130,11 @@ class PuzzleBoard:
 
     def checkWin(self):
         print('current state')
-        self.printState(self.tiles)
+        print(self.tiles)
         print('\n')
         print('winning state')
-        self.printState(self.winningState)
+        print(self.winningState.getState())
         print('\n')
         print(self.getScore())
         # print(np.allclose(self.tiles,self.tiles))
-        return np.allclose(self.tiles, self.winningState)
+        return np.allclose(self.tiles, self.winningState.getState())
