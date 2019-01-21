@@ -3,6 +3,10 @@ class State:
         self.state = state
         self.cost = cost
         self.parent = parent
+        self.queued = False
+        self.visited = False
+    # def __eq__(self, notSelf):
+    #     return self.state == notSelf.getState() and self.cost == notSelf.getCost() and self.parent == notSelf.getParent()
 
     def getState(self):
         return self.state
@@ -25,3 +29,15 @@ class State:
                 if self.state[i][j] == 0:
                     zero_location = {'col':i,'row':j}
         return zero_location
+
+    def is_in_queue(self):
+        return self.queued
+
+    def is_in_visited(self):
+        return self.visited
+
+    def going_in_queue(self):
+        self.queued = True
+
+    def has_been_visited(self):
+        self.visited = True
