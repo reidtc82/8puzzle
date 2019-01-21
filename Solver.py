@@ -1,49 +1,26 @@
 class solver_breadthFirst:
     visited = []
-    enqueue = []
+    queue = []
     def __init__(self, startingState, goalState):
-        self.enqueue.append(startingState)
+        self.queue.append(startingState)
         self.goalState = goalState
 
     def solve(self):
-        while len(self.enqueue) > 0:
-            currentState = self.enqueue.pop(0)
+        while self.queue:
+            currentState = self.queue.pop(0)
             self.visited.append(currentState)
             if np.allclose(self.goalState.getState(), currentState.getState()):
-                return {"parent":currentState.getParent(), "cost":currentState.getCost(), "visited":self.visited}
+                return self.returnPath(currentState)
                 break
             else:
-                thisZero = currentState.getZeroLocation()
+                for child in self.successors(currentState):
+                    if child not in visited:
+                        if child not in queue:
+                            #store info from when created in successor funciton.
+                            #append because breadth first. Use insert for depth first.
+                            queue.append(child)
 
-                if thisZero['col'] == 0:
-                    #search right
-                    if thisZero['row'] == 0:
-                        #search down
+            visited.append(currentState)
 
-                    else if thisZero['row'] == 1:
-                        #search both
-
-                    else if thisZero['row'] == 2:
-                        #search up
-
-                else if thisZero['col'] == 1:
-                    #search left and right
-                    if thisZero['row'] == 0:
-                        #search down
-
-                    else if thisZero['row'] == 1:
-                        #search up and down
-
-                    else if thisZero['row'] == 2:
-                        #search up
-
-                else if thisZero['col'] == 2:
-                    #only search left
-                    if thisZero['row'] == 0:
-                        #only search down
-
-                    else if thisZero['row'] == 1:
-                        #search up and down
-
-                    else if thisZero['row'] == 2:
-                        #only search up
+    def returnPath(self, root):
+        #returns list of dicts to use to define solution. Evrything should be in visited
