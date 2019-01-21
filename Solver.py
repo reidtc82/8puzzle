@@ -27,7 +27,7 @@ class solver_breadthFirst:
             print(self.moves)
             if np.allclose(self.goalState.getState(), currentState.getState()):
                 print('***********end*************')
-                return self.returnPath(self.pathTree[currentState], [])
+                return self.returnPath(currentState, [])
                 break
             else:
                 for child in self.successors(currentState):
@@ -126,9 +126,11 @@ class solver_breadthFirst:
 
     def returnPath(self, node, path):
         #returns list of dicts to use to define solution. Evrything should be in visited
-        if self.pathTree[node][parent] == None:
+        # for n in self.pathTree:
+        #     print(self.pathTree[n])
+        if self.pathTree[node]['parent'] == []:
             path.append(node)
             return path
         else:
             path.append(node)
-            self.returnPath(self.pathTree[node][parent], path)
+            self.returnPath(self.pathTree[node]['parent'], path)
