@@ -6,17 +6,15 @@ class PuzzleBoard:
     tiles = [0] *9
     winningState = [0] *9
     score = 0
-    visited = []
-    enqueue = []
-    
+
     def __init__(self):
         for i in range(9):
             self.tiles[i] = i
 
-        self.easyStart = State([[1,8,7],[3,6,0],[4,2,5]])
-        self.medStart = State([[2,0,7],[8,4,6],[1,3,5]])
-        self.hardStart = State([[5,4,3],[6,0,2],[7,8,1]])
-        self.winningState = State([[1,8,7],[2,0,6],[3,4,5]])
+        self.easyStart = State([[1,8,7],[3,6,0],[4,2,5]],0,[])
+        self.medStart = State([[2,0,7],[8,4,6],[1,3,5]],0,[])
+        self.hardStart = State([[5,4,3],[6,0,2],[7,8,1]],0,[])
+        self.winningState = State([[1,8,7],[2,0,6],[3,4,5]],0,[])
 
         # self.winningState[0] = 1
         # self.winningState[1] = 8

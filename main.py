@@ -9,6 +9,7 @@ else:
 # from tkinter import Tk, Label, Button, Canvas
 
 from PuzzleBoard import PuzzleBoard
+from State import State
 import numpy as np
 
 class Main:
