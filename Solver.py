@@ -1,5 +1,5 @@
 class solver_breadthFirst:
-    # visited = []
+    visited = []
     enqueue = []
     def __init__(self, startingState, goalState):
         self.enqueue.append(startingState)
@@ -8,8 +8,9 @@ class solver_breadthFirst:
     def solve(self):
         while len(self.enqueue) > 0:
             currentState = self.enqueue.pop(0)
+            self.visited.append(currentState)
             if np.allclose(self.goalState.getState(), currentState.getState()):
-                return {"path":currentState.getPath(), "cost":currentState.getCost()}
+                return {"parent":currentState.getParent(), "cost":currentState.getCost(), "visited":self.visited}
                 break
             else:
                 thisZero = currentState.getZeroLocation()

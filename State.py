@@ -1,8 +1,8 @@
 class State:
-    def __init__(self, state, cost, path):
+    def __init__(self, state, cost, parent):
         self.state = state
         self.cost = cost
-        self.path = path
+        self.parent = parent
 
     def getState(self):
         return self.state
@@ -10,14 +10,14 @@ class State:
     def getCost(self):
         return self.cost
 
-    def getPath(self):
-        return self.path
+    def getParent(self):
+        return self.parent
 
-    def addCost(self,pathCost):
+    def addCost(self, pathCost):
         self.cost += pathCost
 
-    def addPath(self,parent):
-        self.path.append(parent)
+    def addParent(self, parent):
+        self.parent = parent
 
     def getZeroLocation(self):
         for i in range(3):
