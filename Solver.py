@@ -14,15 +14,35 @@ class solver_breadthFirst:
             else:
                 thisZero = currentState.getZeroLocation()
 
-                if thisZero.col == 0:
-                    #only search right
-                    if thisZero.row == 0:
-                        #only search down
-                    else if thisZero.row == 1:
+                if thisZero['col'] == 0:
+                    #search right
+                    if thisZero['row'] == 0:
+                        #search down
+
+                    else if thisZero['row'] == 1:
                         #search both
-                    else if thisZero.row == 2:
-                        #only search up
-                else if thisZero.col == 1:
+
+                    else if thisZero['row'] == 2:
+                        #search up
+
+                else if thisZero['col'] == 1:
                     #search left and right
-                else if thisZero.col == 2:
+                    if thisZero['row'] == 0:
+                        #search down
+
+                    else if thisZero['row'] == 1:
+                        #search up and down
+
+                    else if thisZero['row'] == 2:
+                        #search up
+
+                else if thisZero['col'] == 2:
                     #only search left
+                    if thisZero['row'] == 0:
+                        #only search down
+
+                    else if thisZero['row'] == 1:
+                        #search up and down
+
+                    else if thisZero['row'] == 2:
+                        #only search up
