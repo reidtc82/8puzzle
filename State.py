@@ -1,10 +1,11 @@
 class State:
-    def __init__(self, state, cost, parent):
+    def __init__(self, state, cost, parent, dir):
         self.state = state
         self.cost = cost
         self.parent = parent
         self.queued = False
         self.visited = False
+        self.direction = dir
     # def __eq__(self, notSelf):
     #     return self.state == notSelf.getState() and self.cost == notSelf.getCost() and self.parent == notSelf.getParent()
 
@@ -30,14 +31,5 @@ class State:
                     zero_location = {'col':i,'row':j}
         return zero_location
 
-    def is_in_queue(self):
-        return self.queued
-
-    def is_in_visited(self):
-        return self.visited
-
-    def going_in_queue(self):
-        self.queued = True
-
-    def has_been_visited(self):
-        self.visited = True
+    def getDirection(self):
+        return self.direction

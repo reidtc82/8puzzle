@@ -1,11 +1,13 @@
 import numpy as np
 from State import State
 from copy import deepcopy
+from Direction import Direction
 
 class solver_breadthFirst:
     visited = []
     queue = []
     pathTree = dict()
+    path = []
 
     def __init__(self, startingState, goalState, isUniformCost):
         self.queue.append(startingState)
@@ -23,11 +25,9 @@ class solver_breadthFirst:
             # print(len(self.queue))
             self.visited.append(currentState)
             # print('current')
-            print(currentState.getState())
-            print(self.moves)
             if np.allclose(self.goalState.getState(), currentState.getState()):
                 print('***********end*************')
-                return self.returnPath(currentState, [])
+                self.returnPath(currentState)
                 break
             else:
                 for child in self.successors(currentState):
@@ -40,7 +40,7 @@ class solver_breadthFirst:
                             #store info from when created in successor funciton.
                             # print('child')
                             # print(child.getState())
-                            self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost()}
+                            self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
                             #append because breadth first. Use insert for depth first.
                             self.queue.append(child)
                     #ha I think one tab was messing me up
@@ -85,7 +85,7 @@ class solver_breadthFirst:
             newLState[zero_x][zero_y] = leftTile
 
             cost = leftTile if self.iUC else 1
-            leftNew = State(newLState,cost,root)
+            leftNew = State(newLState,cost,root,Direction.LEFT)
 
             successors.append(leftNew)
 
@@ -96,7 +96,7 @@ class solver_breadthFirst:
             newRState[zero_x][zero_y] = rightTile
 
             cost = rightTile if self.iUC else 1
-            rightNew = State(newRState,cost,root)
+            rightNew = State(newRState,cost,root,Direction.RIGHT)
 
             successors.append(rightNew)
 
@@ -107,7 +107,7 @@ class solver_breadthFirst:
             newUState[zero_x][zero_y] = upTile
 
             cost = upTile if self.iUC else 1
-            upNew = State(newUState,cost,root)
+            upNew = State(newUState,cost,root,Direction.UP)
 
             successors.append(upNew)
 
@@ -118,19 +118,20 @@ class solver_breadthFirst:
             newDState[zero_x][zero_y] = downTile
 
             cost = downTile if self.iUC else 1
-            downNew = State(newDState,cost,root)
+            downNew = State(newDState,cost,root,Direction.DOWN)
 
             successors.append(downNew)
 
         return successors
 
-    def returnPath(self, node, path):
+    def returnPath(self, node):
         #returns list of dicts to use to define solution. Evrything should be in visited
         # for n in self.pathTree:
         #     print(self.pathTree[n])
-        if self.pathTree[node]['parent'] == []:
-            path.append(node)
-            return path
-        else:
-            path.append(node)
-            self.returnPath(self.pathTree[node]['parent'], path)
+        # print(self.pathTree[node]['parent'])
+        self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
+        if self.pathTree[node]['parent'] != []:
+            self.returnPath(self.pathTree[node]['parent'])
+
+    def get_path(self):
+        return self.path
