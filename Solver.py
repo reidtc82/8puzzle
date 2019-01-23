@@ -373,8 +373,10 @@ class solver_breadthFirst:
                             # print('child')
                             # print(child.getState())
                             self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
-                            #append because breadth first. Use insert for depth first.
+                            # append because breadth first. Use insert for depth first.
                             self.queue.append(child)
+                        else:
+                            # accomodate cost and overwrite if less with new cost and parent
                     #ha I think one tab was messing me up
                     self.visited.append(currentState)
             self.moves += 1
