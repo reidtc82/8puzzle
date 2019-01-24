@@ -18,10 +18,10 @@ class State:
     def getParent(self):
         return self.parent
 
-    def addCost(self, pathCost):
-        self.cost += pathCost
+    def setCost(self, pathCost):
+        self.cost = pathCost
 
-    def addParent(self, parent):
+    def setParent(self, parent):
         self.parent = parent
 
     def getZeroLocation(self):
@@ -33,3 +33,6 @@ class State:
 
     def getDirection(self):
         return self.direction
+
+    def setDirection(self, dir):
+        self.direction = dir

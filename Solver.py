@@ -372,10 +372,22 @@ class solver_breadthFirst:
                             #store info from when created in successor funciton.
                             # print('child')
                             # print(child.getState())
+                            # print(temp.getCost())
                             self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
                             # append because breadth first. Use insert for depth first.
                             self.queue.append(child)
                         else:
+                            # so many loops, so slow... But the professor said its OK to over-engineer just to get it to work.
+                            # print('found one preexisting')
+                            for q in self.queue:
+                                if np.allclose(q.getState(), child.getState()):
+                                    # print(q.getDirection())
+                                    # print(child.getDirection())
+                                    if child.getCost() < q.getCost():
+                                        print('found a cheaper one')
+                                        q.setCost(child.getCost())
+                                        q.setParent(child.getParent())
+                                        q.setDirection(child.getDirection())
                             # accomodate cost and overwrite if less with new cost and parent
                     #ha I think one tab was messing me up
                     self.visited.append(currentState)
@@ -418,7 +430,7 @@ class solver_breadthFirst:
             newLState[zero_x-1][zero_y] = 0
             newLState[zero_x][zero_y] = leftTile
 
-            cost = leftTile if self.iUC else 1
+            cost = leftTile+root.getCost() if self.iUC else 1+root.getCost()
             leftNew = State(newLState,cost,root,Direction.LEFT)
 
             successors.append(leftNew)
@@ -429,7 +441,7 @@ class solver_breadthFirst:
             newRState[zero_x+1][zero_y] = 0
             newRState[zero_x][zero_y] = rightTile
 
-            cost = rightTile if self.iUC else 1
+            cost = rightTile+root.getCost() if self.iUC else 1+root.getCost()
             rightNew = State(newRState,cost,root,Direction.RIGHT)
 
             successors.append(rightNew)
@@ -440,7 +452,7 @@ class solver_breadthFirst:
             newUState[zero_x][zero_y-1] = 0
             newUState[zero_x][zero_y] = upTile
 
-            cost = upTile if self.iUC else 1
+            cost = upTile+root.getCost() if self.iUC else 1+root.getCost()
             upNew = State(newUState,cost,root,Direction.UP)
 
             successors.append(upNew)
@@ -451,7 +463,7 @@ class solver_breadthFirst:
             newDState[zero_x][zero_y+1] = 0
             newDState[zero_x][zero_y] = downTile
 
-            cost = downTile if self.iUC else 1
+            cost = downTile+root.getCost() if self.iUC else 1+root.getCost()
             downNew = State(newDState,cost,root,Direction.DOWN)
 
             successors.append(downNew)
