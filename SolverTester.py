@@ -9,7 +9,7 @@ what = State([[1,0,7],[2,8,6],[3,4,5]],0,[],None)
 winningState = State([[1,8,7],[2,0,6],[3,4,5]],0,[],None)
 
 # Set final arg to True to do Uniform-Cost
-d_solver = solver_breadthFirst(hardStart,winningState,True)
+d_solver = solver_breadthFirst(medStart,winningState,True)
 d_solver.solve()
 d_solution = d_solver.get_path()
 

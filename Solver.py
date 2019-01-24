@@ -240,6 +240,7 @@ class solver_depthFirst:
         #     if np.allclose(v.getState(), child.getState()):
         #         result = True
         #         break
+        # speed bump - apply this to BFS?
         if repr(child.getState()) in self.visited:
             result = True
         # try:
@@ -255,6 +256,7 @@ class solver_depthFirst:
         #     if np.allclose(q.getState(), child.getState()):
         #         result = True
         #         break
+        # speed bump - apply this to BFS?
         if repr(child.getState()) in self.queue_track:
             result = True
         return result
@@ -377,6 +379,7 @@ class solver_breadthFirst:
                             # append because breadth first. Use insert for depth first.
                             self.queue.append(child)
                         else:
+                            #I'm not 100% sure this is working... It never finds a cheaper node so it never swaps.
                             # so many loops, so slow... But the professor said its OK to over-engineer just to get it to work.
                             # print('found one preexisting')
                             for q in self.queue:
@@ -388,6 +391,8 @@ class solver_breadthFirst:
                                         q.setCost(child.getCost())
                                         q.setParent(child.getParent())
                                         q.setDirection(child.getDirection())
+                                        self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection()}
+
                             # accomodate cost and overwrite if less with new cost and parent
                     #ha I think one tab was messing me up
                     self.visited.append(currentState)
