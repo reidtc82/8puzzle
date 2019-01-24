@@ -25,19 +25,22 @@ class solver_iterative_deepening:
         t0 = time.time()
         current_depth = 0
 
-        for i in range(0, 3):
+        for i in range(0, 5):
             while not self.is_empty(self.queue):
                 # print('at depth {0}'.format(current_depth))
-                if self.moves%1 == 0:
-                    print("Yes I'm still working current moves: {0} ".format(self.moves)+" current queue length: {0}".format(len(self.queue)))
                 # print('queue length before pop')
                 # print(len(self.queue))
                 currentState = self.queue.pop(0)
                 self.queue_track.remove(repr(currentState.getState()))
+                current_depth = currentState.getDepth()
                 # print(currentState.getState())
                 # print('queue length after pop')
                 # print(len(self.queue))
                 self.visited.add(repr(currentState.getState()))
+
+                if self.moves%1 == 0:
+                    print("Yes I'm still working current moves: {0} ".format(self.moves)+" current queue length: {0}".format(len(self.queue))+" current depth: {0}".format(current_depth))
+
                 if np.allclose(self.goalState.getState(), currentState.getState()):
                     print('***********end*************')
                     self.returnPath(currentState)
@@ -107,7 +110,7 @@ class solver_iterative_deepening:
         zero_x = root.getZeroLocation()['col']
         zero_y = root.getZeroLocation()['row']
         temp = root.getState()#wtf python?! I couldnt just pass root.getState() to deepcopy, no, that didnt make a copy. I had to do it like this...
-
+        depth = root.getDepth()+1
         # dont forget to go back and deal with all these ridiculous variables
         newLState = deepcopy(temp)
         newRState = deepcopy(temp)
@@ -122,7 +125,7 @@ class solver_iterative_deepening:
             newLState[zero_x][zero_y] = leftTile
 
             cost = leftTile if self.iUC else 1
-            leftNew = State(newLState,cost,root,Direction.LEFT)
+            leftNew = State(newLState,cost,root,Direction.LEFT,depth)
 
             successors.insert(0,leftNew)
 
@@ -133,7 +136,8 @@ class solver_iterative_deepening:
             newRState[zero_x][zero_y] = rightTile
 
             cost = rightTile if self.iUC else 1
-            rightNew = State(newRState,cost,root,Direction.RIGHT)
+
+            rightNew = State(newRState,cost,root,Direction.RIGHT,depth)
 
             successors.insert(0,rightNew)
 
@@ -144,7 +148,7 @@ class solver_iterative_deepening:
             newUState[zero_x][zero_y] = upTile
 
             cost = upTile if self.iUC else 1
-            upNew = State(newUState,cost,root,Direction.UP)
+            upNew = State(newUState,cost,root,Direction.UP,depth)
 
             successors.insert(0,upNew)
 
@@ -155,7 +159,7 @@ class solver_iterative_deepening:
             newDState[zero_x][zero_y] = downTile
 
             cost = downTile if self.iUC else 1
-            downNew = State(newDState,cost,root,Direction.DOWN)
+            downNew = State(newDState,cost,root,Direction.DOWN,depth)
 
             successors.insert(0,downNew)
 
@@ -266,7 +270,7 @@ class solver_depthFirst:
         zero_x = root.getZeroLocation()['col']
         zero_y = root.getZeroLocation()['row']
         temp = root.getState()#wtf python?! I couldnt just pass root.getState() to deepcopy, no, that didnt make a copy. I had to do it like this...
-
+        depth = 1
         # dont forget to go back and deal with all these ridiculous variables
         newLState = deepcopy(temp)
         newRState = deepcopy(temp)
@@ -281,7 +285,7 @@ class solver_depthFirst:
             newLState[zero_x][zero_y] = leftTile
 
             cost = leftTile if self.iUC else 1
-            leftNew = State(newLState,cost,root,Direction.LEFT)
+            leftNew = State(newLState,cost,root,Direction.LEFT,depth)
 
             successors.insert(0,leftNew)
 
@@ -292,7 +296,7 @@ class solver_depthFirst:
             newRState[zero_x][zero_y] = rightTile
 
             cost = rightTile if self.iUC else 1
-            rightNew = State(newRState,cost,root,Direction.RIGHT)
+            rightNew = State(newRState,cost,root,Direction.RIGHT,depth)
 
             successors.insert(0,rightNew)
 
@@ -303,7 +307,7 @@ class solver_depthFirst:
             newUState[zero_x][zero_y] = upTile
 
             cost = upTile if self.iUC else 1
-            upNew = State(newUState,cost,root,Direction.UP)
+            upNew = State(newUState,cost,root,Direction.UP,depth)
 
             successors.insert(0,upNew)
 
@@ -314,7 +318,7 @@ class solver_depthFirst:
             newDState[zero_x][zero_y] = downTile
 
             cost = downTile if self.iUC else 1
-            downNew = State(newDState,cost,root,Direction.DOWN)
+            downNew = State(newDState,cost,root,Direction.DOWN,depth)
 
             successors.insert(0,downNew)
 
@@ -421,7 +425,7 @@ class solver_breadthFirst:
         zero_x = root.getZeroLocation()['col']
         zero_y = root.getZeroLocation()['row']
         temp = root.getState()#wtf python?! I couldnt just pass root.getState() to deepcopy, no, that didnt make a copy. I had to do it like this...
-
+        depth = 1
         # dont forget to go back and deal with all these ridiculous variables
         newLState = deepcopy(temp)
         newRState = deepcopy(temp)
@@ -436,7 +440,7 @@ class solver_breadthFirst:
             newLState[zero_x][zero_y] = leftTile
 
             cost = leftTile+root.getCost() if self.iUC else 1+root.getCost()
-            leftNew = State(newLState,cost,root,Direction.LEFT)
+            leftNew = State(newLState,cost,root,Direction.LEFT,depth)
 
             successors.append(leftNew)
 
@@ -447,7 +451,7 @@ class solver_breadthFirst:
             newRState[zero_x][zero_y] = rightTile
 
             cost = rightTile+root.getCost() if self.iUC else 1+root.getCost()
-            rightNew = State(newRState,cost,root,Direction.RIGHT)
+            rightNew = State(newRState,cost,root,Direction.RIGHT,depth)
 
             successors.append(rightNew)
 
@@ -458,7 +462,7 @@ class solver_breadthFirst:
             newUState[zero_x][zero_y] = upTile
 
             cost = upTile+root.getCost() if self.iUC else 1+root.getCost()
-            upNew = State(newUState,cost,root,Direction.UP)
+            upNew = State(newUState,cost,root,Direction.UP,depth)
 
             successors.append(upNew)
 
@@ -469,7 +473,7 @@ class solver_breadthFirst:
             newDState[zero_x][zero_y] = downTile
 
             cost = downTile+root.getCost() if self.iUC else 1+root.getCost()
-            downNew = State(newDState,cost,root,Direction.DOWN)
+            downNew = State(newDState,cost,root,Direction.DOWN,depth)
 
             successors.append(downNew)
 

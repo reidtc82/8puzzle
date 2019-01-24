@@ -1,11 +1,12 @@
 class State:
-    def __init__(self, state, cost, parent, dir):
+    def __init__(self, state, cost, parent, dir, dep):
         self.state = state
         self.cost = cost
         self.parent = parent
         self.queued = False
         self.visited = False
         self.direction = dir
+        self.depth = dep
     # def __eq__(self, notSelf):
     #     return self.state == notSelf.getState() and self.cost == notSelf.getCost() and self.parent == notSelf.getParent()
 
@@ -36,3 +37,6 @@ class State:
 
     def setDirection(self, dir):
         self.direction = dir
+
+    def getDepth(self):
+        return self.depth
