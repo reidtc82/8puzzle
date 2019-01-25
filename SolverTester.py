@@ -13,7 +13,7 @@ winningState = State([[1,8,7],[2,0,6],[3,4,5]],0,[],None,0)
 # d_solver.solve()
 # d_solution = d_solver.get_path()
 
-d_solver = solver_iterative_deepening(easyStart,winningState,False)
+d_solver = solver_iterative_deepening(what,winningState,False)
 d_solver.solve()
 d_solution = d_solver.get_path()
 

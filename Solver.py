@@ -27,7 +27,7 @@ class solver_iterative_deepening:
         current_depth = 0
 
         for i in range(math.factorial(9)):
-            self.start_again()
+
             while not self.is_empty(self.queue):
                 # print('at depth {0}'.format(current_depth))
                 # print('queue length before pop')
@@ -74,6 +74,7 @@ class solver_iterative_deepening:
                     # print(t1-t0)
                     break
 
+            self.start_again()
 
     def start_again(self):
         if not self.win:
