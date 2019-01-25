@@ -40,3 +40,6 @@ class State:
 
     def getDepth(self):
         return self.depth
+
+    def set_depth(self, dep):
+        self.depth = dep

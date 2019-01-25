@@ -20,16 +20,19 @@ class solver_iterative_deepening:
         self.pathTree[startingState] = {'parent':startingState.getParent(), 'cost':startingState.getCost()}
         self.moves = 0
         self.start_state = startingState
+        self.win = False
 
     def solve(self):
         t0 = time.time()
         current_depth = 0
 
-        for i in range(0, 5):
+        for i in range(math.factorial(9)):
+            self.start_again()
             while not self.is_empty(self.queue):
                 # print('at depth {0}'.format(current_depth))
                 # print('queue length before pop')
                 # print(len(self.queue))
+                print(self.queue_track)
                 currentState = self.queue.pop(0)
                 self.queue_track.remove(repr(currentState.getState()))
                 current_depth = currentState.getDepth()
@@ -39,13 +42,14 @@ class solver_iterative_deepening:
                 self.visited.add(repr(currentState.getState()))
 
                 if self.moves%1 == 0:
-                    print("Yes I'm still working current moves: {0} ".format(self.moves)+" current queue length: {0}".format(len(self.queue))+" current depth: {0}".format(current_depth))
+                    print("Yes I'm still working current i: {0} ".format(i)+" current queue length: {0}".format(len(self.queue))+" current depth: {0}".format(current_depth))
 
                 if np.allclose(self.goalState.getState(), currentState.getState()):
                     print('***********end*************')
+                    self.win = True
                     self.returnPath(currentState)
                     break
-                elif current_depth <= i:
+                elif current_depth < i:
                     for child in self.successors(currentState):
                         # print('visited')
                         # print(self.visited)
@@ -67,18 +71,32 @@ class solver_iterative_deepening:
                 self.moves += 1
                 if self.moves > 10:
                     t1 = time.time()
-                    print(t1-t0)
+                    # print(t1-t0)
                     break
 
+
+    def start_again(self):
+        if not self.win:
             #start over
+            print('starting again')
+            self.reset_start_state()
             self.queue.append(self.start_state)
+            print(self.queue)
             self.queue_track.add(repr(self.start_state.getState()))
+            print(self.queue_track)
             # self.goalState = goalState
             # self.iUC = isUniformCost
             self.pathTree[self.start_state] = {'parent':self.start_state.getParent(), 'cost':self.start_state.getCost()}
             # self.moves = 0
             current_depth = 0
             self.visited.clear()
+
+    def reset_start_state(self):
+        self.start_state.setCost(0)
+        self.start_state.setDirection(None)
+        self.start_state.setParent(None)
+        self.start_state.set_depth(0)
+        print(self.start_state.getDepth())
 
     def check_visited(self, child):
         result = False
@@ -88,6 +106,7 @@ class solver_iterative_deepening:
         #         break
         if repr(child.getState()) in self.visited:
             result = True
+            # print('I found a visited node')
         # try:
         #     if self.visited[child.getState()]:
         #         result = True
@@ -103,6 +122,7 @@ class solver_iterative_deepening:
         #         break
         if repr(child.getState()) in self.queue_track:
             result = True
+            # print('I found a node in the frontier')
         return result
 
     def successors(self, root):
@@ -170,7 +190,8 @@ class solver_iterative_deepening:
         # for n in self.pathTree:
         #     print(self.pathTree[n])
         # print(self.pathTree[node]['parent'])
-        while self.pathTree[node]['parent'] != []:
+        print(self.pathTree[node]['parent'])
+        while self.pathTree[node]['parent'] != None:
             self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
             node = self.pathTree[node]['parent']
 
