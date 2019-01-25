@@ -32,7 +32,7 @@ class solver_iterative_deepening:
                 # print('at depth {0}'.format(current_depth))
                 # print('queue length before pop')
                 # print(len(self.queue))
-                print(self.queue_track)
+                # print(self.queue_track)
                 currentState = self.queue.pop(0)
                 self.queue_track.remove(repr(currentState.getState()))
                 current_depth = currentState.getDepth()
@@ -42,7 +42,7 @@ class solver_iterative_deepening:
                 self.visited.add(repr(currentState.getState()))
 
                 if self.moves%1 == 0:
-                    print("Yes I'm still working current i: {0} ".format(i)+" current queue length: {0}".format(len(self.queue))+" current depth: {0}".format(current_depth))
+                    print("Yes I'm still working current current: "+str(currentState)+" current i: {0} ".format(i)+" current queue length: {0}".format(len(self.queue))+" current depth: {0}".format(current_depth))
 
                 if np.allclose(self.goalState.getState(), currentState.getState()):
                     print('***********end*************')
@@ -69,10 +69,11 @@ class solver_iterative_deepening:
                         # self.visited[currentState.getState()] = True
 
                 self.moves += 1
-                if self.moves > 10:
-                    t1 = time.time()
-                    # print(t1-t0)
-                    break
+                # if self.moves > 10:
+                #     t1 = time.time()
+                #     # print(t1-t0)
+                #     break
+                print(self.is_empty(self.queue))
 
             self.start_again()
 
@@ -82,9 +83,9 @@ class solver_iterative_deepening:
             print('starting again')
             self.reset_start_state()
             self.queue.append(self.start_state)
-            print(self.queue)
+            # print(self.queue)
             self.queue_track.add(repr(self.start_state.getState()))
-            print(self.queue_track)
+            # print(self.queue_track)
             # self.goalState = goalState
             # self.iUC = isUniformCost
             self.pathTree[self.start_state] = {'parent':self.start_state.getParent(), 'cost':self.start_state.getCost()}
