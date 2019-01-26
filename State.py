@@ -7,6 +7,7 @@ class State:
         self.visited = False
         self.direction = dir
         self.depth = dep
+        self.hCost = 0
     # def __eq__(self, notSelf):
     #     return self.state == notSelf.getState() and self.cost == notSelf.getCost() and self.parent == notSelf.getParent()
 
@@ -43,3 +44,9 @@ class State:
 
     def set_depth(self, dep):
         self.depth = dep
+
+    def set_h_cost(self, hCost):
+        self.hCost = hCost
+
+    def get_h_cost(self):
+        return self.hCost

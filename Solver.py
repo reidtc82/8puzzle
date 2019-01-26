@@ -370,18 +370,20 @@ class solver_breadthFirst:
     pathTree = dict()
     path = []
 
-    def __init__(self, startingState, goalState, isUniformCost):
+    def __init__(self, startingState, goalState, isUniformCost, useHeuristic):
         self.queue.append(startingState)
         self.goalState = goalState
         self.iUC = isUniformCost
         self.pathTree[startingState] = {'parent':startingState.getParent(), 'cost':startingState.getCost()}
         self.moves = 0
+        self.useH = useHeuristic
 
     def solve(self):
         while len(self.queue) != 0:
             # print('queue length before pop')
             # print(len(self.queue))
-            currentState = self.queue.pop(0)
+            # I mean, I could sort, but why if I can just take the lowest in one pass?
+            currentState = self.queue.pop(self.find_lowest_cost_index())
             # print('queue length after pop')
             # print(len(self.queue))
             self.visited.append(currentState)
@@ -392,40 +394,75 @@ class solver_breadthFirst:
                 break
             else:
                 for child in self.successors(currentState):
+                    # print('{0}'.format(currentState.getCost())+' {0}'.format(child.getCost()))
                     # print('visited')
                     # print(self.visited)
-                    if not self.check_visited(child):
+
                         # print('queue')
                         # print(self.queue)
+                    if not self.check_visited(child):
+                        #store info from when created in successor funciton.
+                        print('Im not in visited')
+                        # print(child.getState())
+                        # print(temp.getCost())
                         if not self.check_queue(child):
-                            #store info from when created in successor funciton.
-                            # print('child')
-                            # print(child.getState())
-                            # print(temp.getCost())
+                            print('Im not queued')
                             self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
                             # append because breadth first. Use insert for depth first.
                             self.queue.append(child)
                         else:
-                            #I'm not 100% sure this is working... It never finds a cheaper node so it never swaps.
-                            # so many loops, so slow... But the professor said its OK to over-engineer just to get it to work.
-                            # print('found one preexisting')
                             for q in self.queue:
                                 if np.allclose(q.getState(), child.getState()):
+                                    # print('I found one: {0}'.format(q.getCost())+' {0}'.format(child.getCost()))
+                                    # print(str(q)+" "+str(child))
                                     # print(q.getDirection())
                                     # print(child.getDirection())
-                                    if child.getCost() < q.getCost():
-                                        print('found a cheaper one')
-                                        q.setCost(child.getCost())
-                                        q.setParent(child.getParent())
-                                        q.setDirection(child.getDirection())
-                                        self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection()}
+                                    if self.useH:
+                                        if child.get_h_cost() < q.get_h_cost():
+                                            print('found a cheaper one')
+                                            q.setCost(child.getCost())
+                                            q.setParent(child.getParent())
+                                            q.setDirection(child.getDirection())
+                                            q.set_h_cost(child.get_h_cost())
+                                            self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection()}
+
+                                    else:
+                                        if child.getCost() < q.getCost(): #if its <= then breadth first will mess up
+                                            print('found a cheaper one')
+                                            q.setCost(child.getCost())
+                                            q.setParent(child.getParent())
+                                            q.setDirection(child.getDirection())
+                                            self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection()}
 
                             # accomodate cost and overwrite if less with new cost and parent
                     #ha I think one tab was messing me up
                     self.visited.append(currentState)
             self.moves += 1
-            if len(self.queue) > 1000:
-                break
+            # if len(self.queue) > 1000:
+            #     break
+
+    def heuristic(self, state):
+        s2 = self.goalState.getState()
+
+        result = 0
+        for i in range(3):
+            for j in range(3):
+                if state[i][j] != s2[i][j]:
+                    result += 1
+        return result
+
+    def find_lowest_cost_index(self):
+        lowest = 0
+        for i in range(len(self.queue)):
+            # print(self.heuristic(self.queue[i].getState()))
+            if self.useH:
+                if self.queue[i].get_h_cost() < self.queue[lowest].get_h_cost():
+                    lowest = i
+            else:
+                if self.queue[i].getCost() < self.queue[lowest].getCost():
+                    print('Im the cheapest {0}'.format(i)+' of queue length {0}'.format(len(self.queue)))
+                    lowest = i
+        return lowest
 
     def check_visited(self, child):
         result = False
@@ -437,8 +474,8 @@ class solver_breadthFirst:
 
     def check_queue(self, child):
         result = False
-        for q in self.queue:
-            if np.allclose(q.getState(), child.getState()):
+        for cq in self.queue:
+            if np.allclose(cq.getState(), child.getState()):
                 result = True
                 break
         return result
@@ -464,8 +501,10 @@ class solver_breadthFirst:
 
             cost = leftTile+root.getCost() if self.iUC else 1+root.getCost()
             leftNew = State(newLState,cost,root,Direction.LEFT,depth)
+            leftNew.set_h_cost(self.heuristic(newLState))
 
             successors.append(leftNew)
+            del leftNew
 
         if zero_x != 2:
             #take right child
@@ -475,8 +514,10 @@ class solver_breadthFirst:
 
             cost = rightTile+root.getCost() if self.iUC else 1+root.getCost()
             rightNew = State(newRState,cost,root,Direction.RIGHT,depth)
+            rightNew.set_h_cost(self.heuristic(newRState))
 
             successors.append(rightNew)
+            del rightNew
 
         if zero_y != 0:
             #take upper child
@@ -486,8 +527,10 @@ class solver_breadthFirst:
 
             cost = upTile+root.getCost() if self.iUC else 1+root.getCost()
             upNew = State(newUState,cost,root,Direction.UP,depth)
+            upNew.set_h_cost(self.heuristic(newUState))
 
             successors.append(upNew)
+            del upNew
 
         if zero_y != 2:
             #take lower child
@@ -497,8 +540,10 @@ class solver_breadthFirst:
 
             cost = downTile+root.getCost() if self.iUC else 1+root.getCost()
             downNew = State(newDState,cost,root,Direction.DOWN,depth)
+            downNew.set_h_cost(self.heuristic(newDState))
 
             successors.append(downNew)
+            del downNew
 
         return successors
 

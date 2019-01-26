@@ -9,11 +9,8 @@ what = State([[1,7,0],[2,8,6],[3,4,5]],0,[],None,0)
 winningState = State([[1,8,7],[2,0,6],[3,4,5]],0,[],None,0)
 
 # Set final arg to True to do Uniform-Cost
-# d_solver = solver_breadthFirst(medStart,winningState,True)
-# d_solver.solve()
-# d_solution = d_solver.get_path()
-
-d_solver = solver_iterative_deepening(easyStart,winningState,False)
+d_solver = solver_breadthFirst(medStart,winningState,True,True)
+# d_solver = solver_iterative_deepening(easyStart,winningState,False)
 d_solver.solve()
 d_solution = d_solver.get_path()
 
@@ -22,8 +19,7 @@ for sol in d_solution:
     if 'direction' in solNode.keys():
         print('Move '+str(solNode['direction']))
     else:
-        print('Starting Depth First')
-    print('Cost is ')
-    print(solNode['cost'])
+        print('Starting lol First')
+    print('Cost is {0}'.format(solNode['cost']))
     print('State')
     print(sol['node'].getState())
