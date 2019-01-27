@@ -1,6 +1,7 @@
 from State import State
-from Solver import solver_breadthFirst, solver_depthFirst, solver_iterative_deepening
+from Solver import solver_FIFO, solver_depthFirst, solver_iterative_deepening
 from copy import deepcopy
+from Heuristic import Heuristic
 import time
 
 easyStart = State([[1,8,7],[3,6,0],[4,2,5]],0,[],None,0)
@@ -10,14 +11,25 @@ what = State([[1,7,0],[2,8,6],[3,4,5]],0,[],None,0)
 winningState = State([[1,8,7],[2,0,6],[3,4,5]],0,[],None,0)
 
 # Set final arg to True to do Uniform-Cost
-# breadth-first
-# d_solver = solver_breadthFirst(medStart,winningState,False,False)
-# uniform-cost
-# d_solver = solver_breadthFirst(hardStart,winningState,True,False)
-# best_first
-d_solver = solver_breadthFirst(hardStart,winningState,True,True)
 
+# breadth-first - dont use tile weights and no heuristic
+# d_solver = solver_FIFO(medStart,winningState,False,None)
+
+# uniform-cost - do use tile weights and no heuristic
+# d_solver = solver_FIFO(hardStart,winningState,True,None)
+
+# best_first - do use tile weights (only just tracking them here but not counting towards solution) and uses a heuristic
+# d_solver = solver_FIFO(hardStart,winningState,True,Heuristic.misplaced_tiles)
+
+# A*1 - do use tile weights and uses a heuristic (per assignment - other impls. just use 1 for cost)
+# d_solver = solver_FIFO(hardStart, winningState, True, Heuristic.a_star_1)
+
+# A*2 - I think this one is purely Manhattan distance and no move cost function
+d_solver = solver_FIFO(medStart, winningState, True, Heuristic.a_star_2)
+
+# iterative deepening
 # d_solver = solver_iterative_deepening(easyStart,winningState,False)
+
 t1 = time.time()
 d_solver.solve()
 t2 = time.time()

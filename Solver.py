@@ -2,6 +2,7 @@ import numpy as np
 from State import State
 from copy import deepcopy
 from Direction import Direction
+from Heuristic import Heuristic
 import time
 import math
 
@@ -364,19 +365,19 @@ class solver_depthFirst:
 
 #----------------------------------------------------
 
-class solver_breadthFirst:
+class solver_FIFO:
     visited = []
     queue = []
     pathTree = dict()
     path = []
 
-    def __init__(self, startingState, goalState, isUniformCost, useHeuristic):
+    def __init__(self, startingState, goalState, useTileWeights, heuristic):
         self.queue.append(startingState)
         self.goalState = goalState
-        self.iUC = isUniformCost
+        self.useTileWeights = useTileWeights
         self.pathTree[startingState] = {'parent':startingState.getParent(), 'cost':startingState.getCost()}
         self.moves = 0
-        self.useH = useHeuristic
+        self.heuristic = heuristic
         self.maxQueueLen = 0
 
     def solve(self):
@@ -414,7 +415,7 @@ class solver_breadthFirst:
                         # print(temp.getCost())
                         if not self.check_queue(child):
                             print('Im not queued')
-                            if not self.useH:
+                            if not self.heuristic:
                                 self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
                             else:
                                 self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection(), 'heuristic':child.get_h_cost()}
@@ -427,7 +428,15 @@ class solver_breadthFirst:
                                     # print(str(q)+" "+str(child))
                                     # print(q.getDirection())
                                     # print(child.getDirection())
-                                    if self.useH:
+                                    if self.heuristic == None:
+                                        if child.getCost() < q.getCost(): #if its <= then breadth first will mess up
+                                            print('found a cheaper one')
+                                            q.setCost(child.getCost())
+                                            q.setParent(child.getParent())
+                                            q.setDirection(child.getDirection())
+                                            self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection()}
+
+                                    else:
                                         if child.get_h_cost() < q.get_h_cost():
                                             print('found a cheaper one')
                                             q.setCost(child.getCost())
@@ -436,13 +445,6 @@ class solver_breadthFirst:
                                             q.set_h_cost(child.get_h_cost())
                                             self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection(), 'heuristic':q.get_h_cost()}
 
-                                    else:
-                                        if child.getCost() < q.getCost(): #if its <= then breadth first will mess up
-                                            print('found a cheaper one')
-                                            q.setCost(child.getCost())
-                                            q.setParent(child.getParent())
-                                            q.setDirection(child.getDirection())
-                                            self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection()}
 
                             # accomodate cost and overwrite if less with new cost and parent
                     #ha I think one tab was messing me up
@@ -451,26 +453,58 @@ class solver_breadthFirst:
             # if len(self.queue) > 1000:
             #     break
 
-    def heuristic(self, state):
+    def _heuristic(self, h, state):
+        s1 = state.getState()
         s2 = self.goalState.getState()
+        result = 0
+        # seems like I shouldnt could 0 position
+        if h == Heuristic.misplaced_tiles or h == Heuristic.a_star_1:
+            for i in range(3):
+                for j in range(3):
+                    if s1[i][j] != s2[i][j]:
+                        result += 1
+            if h == Heuristic.a_star_1:
+                # this should be sum of move costs = 1 if A*1 was called with correct args
+                result += state.getCost()
 
+        elif h == Heuristic.a_star_2:
+            # Manhattan distance alone?
+            result += self.sum_of_manhattan_distance(s1, s2)
+
+        elif h == Heuristic.a_star_3:
+            result = 0
+
+        return result
+
+    def sum_of_manhattan_distance(self, s1, s2):
+        mD = [0] *9
         result = 0
         for i in range(3):
             for j in range(3):
-                if state[i][j] != s2[i][j]:
-                    result += 1
+                # get the position of the goal values indexed by the value
+                mD[s2[i][j]] = [i,j]
+        for i in range(3):
+            for j in range(3):
+                # sum of Manhattan distances of each value in the current state
+                # basically, find the index of the current value in mD and get its position in the goal state
+                # subtract the current position from that
+                # add the absolute values of those differences together for Manhattan distance of these values
+                # add to the total
+                # confusing enough?
+                # sum(abs(goal(x)-current(x)), abs(goal(y)-current(y))) for whatever value we're on currently
+                result += abs(mD[s1[i][j]][0] - i)+abs(mD[s1[i][j]][1] - j)
         return result
 
     def find_lowest_cost_index(self):
         lowest = 0
         for i in range(len(self.queue)):
             # print(self.heuristic(self.queue[i].getState()))
-            if self.useH:
+            if self.heuristic:
                 if self.queue[i].get_h_cost() < self.queue[lowest].get_h_cost():
                     lowest = i
             else:
                 if self.queue[i].getCost() < self.queue[lowest].getCost():
-                    print('Im the cheapest {0}'.format(i)+' of queue length {0}'.format(len(self.queue)))
+                    # print('Im the cheapest {0}'.format(i)+' of queue length {0}'.format(len(self.queue)))
                     lowest = i
         return lowest
 
@@ -509,9 +543,9 @@ class solver_breadthFirst:
             newLState[zero_x-1][zero_y] = 0
             newLState[zero_x][zero_y] = leftTile
 
-            cost = leftTile+root.getCost() if self.iUC else 1+root.getCost()
+            cost = leftTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             leftNew = State(newLState,cost,root,Direction.LEFT,depth)
-            leftNew.set_h_cost(self.heuristic(newLState))
+            leftNew.set_h_cost(self._heuristic(self.heuristic, leftNew))
 
             successors.append(leftNew)
             del leftNew
@@ -522,9 +556,9 @@ class solver_breadthFirst:
             newRState[zero_x+1][zero_y] = 0
             newRState[zero_x][zero_y] = rightTile
 
-            cost = rightTile+root.getCost() if self.iUC else 1+root.getCost()
+            cost = rightTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             rightNew = State(newRState,cost,root,Direction.RIGHT,depth)
-            rightNew.set_h_cost(self.heuristic(newRState))
+            rightNew.set_h_cost(self._heuristic(self.heuristic, rightNew))
 
             successors.append(rightNew)
             del rightNew
@@ -535,9 +569,9 @@ class solver_breadthFirst:
             newUState[zero_x][zero_y-1] = 0
             newUState[zero_x][zero_y] = upTile
 
-            cost = upTile+root.getCost() if self.iUC else 1+root.getCost()
+            cost = upTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             upNew = State(newUState,cost,root,Direction.UP,depth)
-            upNew.set_h_cost(self.heuristic(newUState))
+            upNew.set_h_cost(self._heuristic(self.heuristic, upNew))
 
             successors.append(upNew)
             del upNew
@@ -548,9 +582,9 @@ class solver_breadthFirst:
             newDState[zero_x][zero_y+1] = 0
             newDState[zero_x][zero_y] = downTile
 
-            cost = downTile+root.getCost() if self.iUC else 1+root.getCost()
+            cost = downTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             downNew = State(newDState,cost,root,Direction.DOWN,depth)
-            downNew.set_h_cost(self.heuristic(newDState))
+            downNew.set_h_cost(self._heuristic(self.heuristic, downNew))
 
             successors.append(downNew)
             del downNew
