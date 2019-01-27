@@ -13,15 +13,22 @@ class solver_iterative_deepening:
     pathTree = dict()
     path = []
 
-    def __init__(self, startingState, goalState, isUniformCost):
+    def __init__(self, startingState, goalState, useTileWeights, heuristic):
         self.queue.append(startingState)
         self.queue_track.add(repr(startingState.getState()))
         self.goalState = goalState
-        self.iUC = isUniformCost
+        self.useTileWeights = useTileWeights
         self.pathTree[startingState] = {'parent':startingState.getParent(), 'cost':startingState.getCost()}
         self.moves = 0
         self.start_state = startingState
         self.win = False
+        if heuristic:
+            if heuristic == Heuristic.iterative_deepening:
+                self.rangeStart = 0
+            else:
+                raise Exception('Only acceptable heuristics for LIFO are iterative_deepening or None')
+        else:
+            self.rangeStart = math.factorial(9)
 
     def solve(self):
         t0 = time.time()
@@ -30,16 +37,11 @@ class solver_iterative_deepening:
         for i in range(math.factorial(9)):
 
             while not self.is_empty(self.queue):
-                # print('at depth {0}'.format(current_depth))
-                # print('queue length before pop')
-                # print(len(self.queue))
-                # print(self.queue_track)
+
                 currentState = self.queue.pop(0)
                 self.queue_track.remove(repr(currentState.getState()))
                 current_depth = currentState.getDepth()
-                # print(currentState.getState())
-                # print('queue length after pop')
-                # print(len(self.queue))
+
                 self.visited.add(repr(currentState.getState()))
 
                 if self.moves%1 == 0:
@@ -52,29 +54,17 @@ class solver_iterative_deepening:
                     break
                 elif current_depth < i:
                     for child in self.successors(currentState):
-                        # print('visited')
-                        # print(self.visited)
-                        # print(self.check_visited(child))
+
                         if not self.check_visited(child):
-                            # print('queue')
-                            # print(self.queue)
+
                             if not self.check_queue(child):
                                 #store info from when created in successor funciton.
-                                # print('child')
-                                # print(child.getState())
                                 self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
                                 #append because breadth first. Use insert for depth first.
                                 self.queue.insert(0, child)
                                 self.queue_track.add(repr(child.getState()))
-                        #ha I think one tab was messing me up
-                        # self.visited[currentState.getState()] = True
 
                 self.moves += 1
-                # if self.moves > 10:
-                #     t1 = time.time()
-                #     # print(t1-t0)
-                #     break
-                print(self.is_empty(self.queue))
 
             self.start_again()
 
@@ -84,13 +74,8 @@ class solver_iterative_deepening:
             print('starting again')
             self.reset_start_state()
             self.queue.append(self.start_state)
-            # print(self.queue)
             self.queue_track.add(repr(self.start_state.getState()))
-            # print(self.queue_track)
-            # self.goalState = goalState
-            # self.iUC = isUniformCost
             self.pathTree[self.start_state] = {'parent':self.start_state.getParent(), 'cost':self.start_state.getCost()}
-            # self.moves = 0
             current_depth = 0
             self.visited.clear()
 
@@ -103,29 +88,18 @@ class solver_iterative_deepening:
 
     def check_visited(self, child):
         result = False
-        # for v in self.visited:
-        #     if np.allclose(v.getState(), child.getState()):
-        #         result = True
-        #         break
+
         if repr(child.getState()) in self.visited:
             result = True
-            # print('I found a visited node')
-        # try:
-        #     if self.visited[child.getState()]:
-        #         result = True
-        # except:
-        #     pass
+
         return result
 
     def check_queue(self, child):
         result = False
-        # for q in self.queue:
-        #     if np.allclose(q.getState(), child.getState()):
-        #         result = True
-        #         break
+
         if repr(child.getState()) in self.queue_track:
             result = True
-            # print('I found a node in the frontier')
+
         return result
 
     def successors(self, root):
@@ -147,7 +121,7 @@ class solver_iterative_deepening:
             newLState[zero_x-1][zero_y] = 0
             newLState[zero_x][zero_y] = leftTile
 
-            cost = leftTile if self.iUC else 1
+            cost = leftTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             leftNew = State(newLState,cost,root,Direction.LEFT,depth)
 
             successors.insert(0,leftNew)
@@ -158,7 +132,7 @@ class solver_iterative_deepening:
             newRState[zero_x+1][zero_y] = 0
             newRState[zero_x][zero_y] = rightTile
 
-            cost = rightTile if self.iUC else 1
+            cost = rightTile+root.getCost() if self.useTileWeights else 1+root.getCost()
 
             rightNew = State(newRState,cost,root,Direction.RIGHT,depth)
 
@@ -170,7 +144,7 @@ class solver_iterative_deepening:
             newUState[zero_x][zero_y-1] = 0
             newUState[zero_x][zero_y] = upTile
 
-            cost = upTile if self.iUC else 1
+            cost = upTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             upNew = State(newUState,cost,root,Direction.UP,depth)
 
             successors.insert(0,upNew)
@@ -181,7 +155,7 @@ class solver_iterative_deepening:
             newDState[zero_x][zero_y+1] = 0
             newDState[zero_x][zero_y] = downTile
 
-            cost = downTile if self.iUC else 1
+            cost = downTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             downNew = State(newDState,cost,root,Direction.DOWN,depth)
 
             successors.insert(0,downNew)
@@ -190,9 +164,7 @@ class solver_iterative_deepening:
 
     def returnPath(self, node):
         #returns list of dicts to use to define solution. Evrything should be in visited
-        # for n in self.pathTree:
-        #     print(self.pathTree[n])
-        # print(self.pathTree[node]['parent'])
+
         print(self.pathTree[node]['parent'])
         while self.pathTree[node]['parent'] != None:
             self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
@@ -213,11 +185,11 @@ class solver_depthFirst:
     pathTree = dict()
     path = []
 
-    def __init__(self, startingState, goalState, isUniformCost):
+    def __init__(self, startingState, goalState, useTileWeights):
         self.queue.append(startingState)
         self.queue_track.add(repr(startingState.getState()))
         self.goalState = goalState
-        self.iUC = isUniformCost
+        self.useTileWeights = useTileWeights
         self.pathTree[startingState] = {'parent':startingState.getParent(), 'cost':startingState.getCost()}
         self.moves = 0
 
@@ -226,13 +198,10 @@ class solver_depthFirst:
         while not self.is_empty(self.queue):
             if self.moves%10000 == 0:
                 print("Yes I'm still working current moves: {0} ".format(self.moves)+" current queue length: {0}".format(len(self.queue)))
-            # print('queue length before pop')
-            # print(len(self.queue))
+
             currentState = self.queue.pop(0)
             self.queue_track.remove(repr(currentState.getState()))
-            # print(currentState.getState())
-            # print('queue length after pop')
-            # print(len(self.queue))
+
             self.visited.add(repr(currentState.getState()))
             if np.allclose(self.goalState.getState(), currentState.getState()):
                 print('***********end*************')
@@ -240,51 +209,28 @@ class solver_depthFirst:
                 break
             else:
                 for child in self.successors(currentState):
-                    # print('visited')
-                    # print(self.visited)
-                    # print(self.check_visited(child))
                     if not self.check_visited(child):
-                        # print('queue')
-                        # print(self.queue)
                         if not self.check_queue(child):
                             #store info from when created in successor funciton.
-                            # print('child')
-                            # print(child.getState())
                             self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
                             #append because breadth first. Use insert for depth first.
                             self.queue.insert(0, child)
                             self.queue_track.add(repr(child.getState()))
-                    #ha I think one tab was messing me up
-                    # self.visited[currentState.getState()] = True
+
             self.moves += 1
-            if self.moves > 1000000:
-                t1 = time.time()
-                print(t1-t0)
-                break
+
 
     def check_visited(self, child):
         result = False
-        # for v in self.visited:
-        #     if np.allclose(v.getState(), child.getState()):
-        #         result = True
-        #         break
-        # speed bump - apply this to BFS?
+
         if repr(child.getState()) in self.visited:
             result = True
-        # try:
-        #     if self.visited[child.getState()]:
-        #         result = True
-        # except:
-        #     pass
+
         return result
 
     def check_queue(self, child):
         result = False
-        # for q in self.queue:
-        #     if np.allclose(q.getState(), child.getState()):
-        #         result = True
-        #         break
-        # speed bump - apply this to BFS?
+
         if repr(child.getState()) in self.queue_track:
             result = True
         return result
@@ -308,7 +254,7 @@ class solver_depthFirst:
             newLState[zero_x-1][zero_y] = 0
             newLState[zero_x][zero_y] = leftTile
 
-            cost = leftTile if self.iUC else 1
+            cost = leftTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             leftNew = State(newLState,cost,root,Direction.LEFT,depth)
 
             successors.insert(0,leftNew)
@@ -319,7 +265,7 @@ class solver_depthFirst:
             newRState[zero_x+1][zero_y] = 0
             newRState[zero_x][zero_y] = rightTile
 
-            cost = rightTile if self.iUC else 1
+            cost = rightTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             rightNew = State(newRState,cost,root,Direction.RIGHT,depth)
 
             successors.insert(0,rightNew)
@@ -330,7 +276,7 @@ class solver_depthFirst:
             newUState[zero_x][zero_y-1] = 0
             newUState[zero_x][zero_y] = upTile
 
-            cost = upTile if self.iUC else 1
+            cost = upTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             upNew = State(newUState,cost,root,Direction.UP,depth)
 
             successors.insert(0,upNew)
@@ -341,7 +287,7 @@ class solver_depthFirst:
             newDState[zero_x][zero_y+1] = 0
             newDState[zero_x][zero_y] = downTile
 
-            cost = downTile if self.iUC else 1
+            cost = downTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             downNew = State(newDState,cost,root,Direction.DOWN,depth)
 
             successors.insert(0,downNew)
@@ -349,10 +295,6 @@ class solver_depthFirst:
         return successors
 
     def returnPath(self, node):
-        #returns list of dicts to use to define solution. Evrything should be in visited
-        # for n in self.pathTree:
-        #     print(self.pathTree[n])
-        # print(self.pathTree[node]['parent'])
         while self.pathTree[node]['parent'] != []:
             self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
             node = self.pathTree[node]['parent']
@@ -382,18 +324,14 @@ class solver_FIFO:
 
     def solve(self):
         while len(self.queue) != 0:
-            # print('queue length before pop')
-            # print(len(self.queue))
-            # I mean, I could sort, but why if I can just take the lowest in one pass?
             if len(self.queue) > self.maxQueueLen:
                 self.maxQueueLen = len(self.queue)
             print('Queue length {0}'.format(len(self.queue)))
             print('visited count {0}'.format(len(self.visited)))
             currentState = self.queue.pop(self.find_lowest_cost_index())
-            # print('queue length after pop')
-            # print(len(self.queue))
+
             self.visited.append(currentState)
-            # print('current')
+
             if np.allclose(self.goalState.getState(), currentState.getState()):
                 print('***********end*************')
                 print('visited count {0}'.format(len(self.visited)))
@@ -402,17 +340,8 @@ class solver_FIFO:
                 break
             else:
                 for child in self.successors(currentState):
-                    # print('{0}'.format(currentState.getCost())+' {0}'.format(child.getCost()))
-                    # print('visited')
-                    # print(self.visited)
-
-                        # print('queue')
-                        # print(self.queue)
                     if not self.check_visited(child):
                         #store info from when created in successor funciton.
-                        print('Im not in visited')
-                        # print(child.getState())
-                        # print(temp.getCost())
                         if not self.check_queue(child):
                             print('Im not queued')
                             if not self.heuristic:
@@ -424,10 +353,6 @@ class solver_FIFO:
                         else:
                             for q in self.queue:
                                 if np.allclose(q.getState(), child.getState()):
-                                    # print('I found one: {0}'.format(q.getCost())+' {0}'.format(child.getCost()))
-                                    # print(str(q)+" "+str(child))
-                                    # print(q.getDirection())
-                                    # print(child.getDirection())
                                     if self.heuristic == None:
                                         if child.getCost() < q.getCost(): #if its <= then breadth first will mess up
                                             print('found a cheaper one')
@@ -445,13 +370,9 @@ class solver_FIFO:
                                             q.set_h_cost(child.get_h_cost())
                                             self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection(), 'heuristic':q.get_h_cost()}
 
-
-                            # accomodate cost and overwrite if less with new cost and parent
-                    #ha I think one tab was messing me up
                     self.visited.append(currentState)
+
             self.moves += 1
-            # if len(self.queue) > 1000:
-            #     break
 
     def _heuristic(self, h, state):
         s1 = state.getState()
@@ -472,7 +393,8 @@ class solver_FIFO:
             result += self.sum_of_manhattan_distance(s1, s2)
 
         elif h == Heuristic.a_star_3:
-            result = 0
+            # I feel like this is cheating but it works.
+            result += self.sum_of_manhattan_distance(s1, s2)+state.getCost()
 
         return result
 
@@ -593,9 +515,6 @@ class solver_FIFO:
 
     def returnPath(self, node):
         #returns list of dicts to use to define solution. Evrything should be in visited
-        # for n in self.pathTree:
-        #     print(self.pathTree[n])
-        # print(self.pathTree[node]['parent'])
         self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
         if self.pathTree[node]['parent'] != []:
             self.returnPath(self.pathTree[node]['parent'])

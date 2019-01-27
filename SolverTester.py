@@ -12,6 +12,12 @@ winningState = State([[1,8,7],[2,0,6],[3,4,5]],0,[],None,0)
 
 # Set final arg to True to do Uniform-Cost
 
+# depth-first - dont use tile weights? If true it will tally but notuse them for next path to check.
+# d_solver = solver_depthFirst(easyStart,winningState,False, None)
+
+# iterative deepening - dont use tile weights? If true it will tally but notuse them for next path to check.
+d_solver = solver_iterative_deepening(easyStart,winningState,False,Heuristic.iterative_deepening)
+
 # breadth-first - dont use tile weights and no heuristic
 # d_solver = solver_FIFO(medStart,winningState,False,None)
 
@@ -25,10 +31,11 @@ winningState = State([[1,8,7],[2,0,6],[3,4,5]],0,[],None,0)
 # d_solver = solver_FIFO(hardStart, winningState, True, Heuristic.a_star_1)
 
 # A*2 - I think this one is purely Manhattan distance and no move cost function
-d_solver = solver_FIFO(medStart, winningState, True, Heuristic.a_star_2)
+# d_solver = solver_FIFO(medStart, winningState, True, Heuristic.a_star_2)
 
-# iterative deepening
-# d_solver = solver_iterative_deepening(easyStart,winningState,False)
+# A*3 - Basically manhattan distance plus cost h(n)+g(n)
+# d_solver = solver_FIFO(hardStart, winningState, True, Heuristic.a_star_3)
+
 
 t1 = time.time()
 d_solver.solve()

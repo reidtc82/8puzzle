@@ -5,3 +5,4 @@ class Heuristic(Enum):
     a_star_1 = 1
     a_star_2 = 2
     a_star_3 = 3
+    iterative_deepening = 4
