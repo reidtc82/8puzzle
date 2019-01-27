@@ -377,12 +377,17 @@ class solver_breadthFirst:
         self.pathTree[startingState] = {'parent':startingState.getParent(), 'cost':startingState.getCost()}
         self.moves = 0
         self.useH = useHeuristic
+        self.maxQueueLen = 0
 
     def solve(self):
         while len(self.queue) != 0:
             # print('queue length before pop')
             # print(len(self.queue))
             # I mean, I could sort, but why if I can just take the lowest in one pass?
+            if len(self.queue) > self.maxQueueLen:
+                self.maxQueueLen = len(self.queue)
+            print('Queue length {0}'.format(len(self.queue)))
+            print('visited count {0}'.format(len(self.visited)))
             currentState = self.queue.pop(self.find_lowest_cost_index())
             # print('queue length after pop')
             # print(len(self.queue))
@@ -390,6 +395,8 @@ class solver_breadthFirst:
             # print('current')
             if np.allclose(self.goalState.getState(), currentState.getState()):
                 print('***********end*************')
+                print('visited count {0}'.format(len(self.visited)))
+                print('max queue length {0}'.format(self.maxQueueLen))
                 self.returnPath(currentState)
                 break
             else:
@@ -407,7 +414,10 @@ class solver_breadthFirst:
                         # print(temp.getCost())
                         if not self.check_queue(child):
                             print('Im not queued')
-                            self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
+                            if not self.useH:
+                                self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
+                            else:
+                                self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection(), 'heuristic':child.get_h_cost()}
                             # append because breadth first. Use insert for depth first.
                             self.queue.append(child)
                         else:
@@ -424,7 +434,7 @@ class solver_breadthFirst:
                                             q.setParent(child.getParent())
                                             q.setDirection(child.getDirection())
                                             q.set_h_cost(child.get_h_cost())
-                                            self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection()}
+                                            self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection(), 'heuristic':q.get_h_cost()}
 
                                     else:
                                         if child.getCost() < q.getCost(): #if its <= then breadth first will mess up
