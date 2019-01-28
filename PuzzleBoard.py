@@ -16,10 +16,10 @@ class PuzzleBoard:
             self.tiles[i] = i
 
         # didnt get to finish making this part but setting up for intended use with the search algorithms
-        self.easyStart = State([[1,8,7],[3,6,0],[4,2,5]],0,[],None)
-        self.medStart = State([[2,0,7],[8,4,6],[1,3,5]],0,[],None)
-        self.hardStart = State([[5,4,3],[6,0,2],[7,8,1]],0,[],None)
-        self.winningState = State([[1,8,7],[2,0,6],[3,4,5]],0,[],None)
+        self.easyStart = State([[1,8,7],[3,6,0],[4,2,5]],0,[],None,0)
+        self.medStart = State([[2,0,7],[8,4,6],[1,3,5]],0,[],None,0)
+        self.hardStart = State([[5,4,3],[6,0,2],[7,8,1]],0,[],None,0)
+        self.winningState = State([[1,8,7],[2,0,6],[3,4,5]],0,[],None,0)
 
         # self.winningState[0] = 1
         # self.winningState[1] = 8
