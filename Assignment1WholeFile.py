@@ -45,18 +45,23 @@ class State:
 
     # standard accessors
     def getState(self):
+        # returns list of the actual tile value arrangement
         return self.state
 
     def getCost(self):
+        # returns the cost g(n)
         return self.cost
 
     def getParent(self):
+        # returns parent state
         return self.parent
 
     def setCost(self, pathCost):
+        # allows changing of the cost
         self.cost = pathCost
 
     def setParent(self, parent):
+        # allows changing of the parent
         self.parent = parent
 
     # for the GUI that never came to be
@@ -68,21 +73,29 @@ class State:
         return zero_location
 
     def getDirection(self):
+        # direction moved to get to this state
         return self.direction
 
     def setDirection(self, dir):
+        # sets the direction
         self.direction = dir
 
     def getDepth(self):
+        # not really used now that I think about it
+        # returns depth
         return self.depth
 
     def set_depth(self, dep):
+        # sets depth
+        # intended for IDS but never used
         self.depth = dep
 
     def set_h_cost(self, hCost):
+        # sets h(n)
         self.hCost = hCost
 
     def get_h_cost(self):
+        # returns h(n)
         return self.hCost
 
 
@@ -121,6 +134,7 @@ class solver_FIFO:
         print(len(self.queue))
 
     def solve(self):
+        # solver for FIFOs
         t0 = time.time()
         while len(self.queue) != 0:
             # Inside main loop for BFS and variants
@@ -156,8 +170,12 @@ class solver_FIFO:
                 # if I dont pass a heuristic this is just BFS
                 currentState = self.queue.pop(0)
 
+            # used to keep track of queue.
+            # lists are ordered, sets and dict are notself.# dict I can index iwth the state object
+            # set I can find membership quickly but cant index with the state object so I stringify the state
             self.queue_track.remove(repr(currentState.getState()))
 
+            # seems early but we have popped it so its visited. Helps keep track if we are immediately a winner
             self.visited.add(repr(currentState.getState()))
 
             if np.allclose(self.goalState.getState(), currentState.getState()):
@@ -175,6 +193,7 @@ class solver_FIFO:
                         if not self.check_queue(child):
                             # check in queue
                             if not self.heuristic:
+                                # pathTree is just a reconstruction of how we got to each state so we can rebuild the final solutoion path at the end
                                 # no heuristic then we dont really need to store the heuristic cost for the final path
                                 self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
                             else:
@@ -274,7 +293,6 @@ class solver_FIFO:
 
         if repr(child.getState()) in self.visited:
             result = True
-
         return result
 
     def check_queue(self, child):
