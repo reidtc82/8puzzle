@@ -305,7 +305,12 @@ class solver_FIFO:
             # Popping the node with the index that is returned
             # I could sort but if I jsut give it the lowest its a little faster I think
             # Sorting would take more operations, finding the lowest takes a single pass through the queue
-            currentState = self.queue.pop(self.find_lowest_cost_index())
+            if self.heuristic:
+                currentState = self.queue.pop(self.find_lowest_cost_index())
+            else:
+                # if I dont pass a heuristic this is just BFS
+                currentState = self.queue.pop(0)
+
             self.queue_track.remove(repr(currentState.getState()))
 
             self.visited.add(repr(currentState.getState()))
@@ -334,10 +339,8 @@ class solver_FIFO:
                             self.queue.append(child)
                             self.queue_track.add(repr(child.getState()))
                         else:
-                            # If the child was not in visitied but was in queued then we just replace the values for the object
+                            # If the child was not in visited but was in queued then we just replace the values for the object
                             # rather than add and delete stuff
-                            # if it was visited then we dont care because it already had all its children and would have
-                            # already explored it form the cheapest path
                             for q in self.queue:
                                 if np.allclose(q.getState(), child.getState()):
                                     if self.heuristic == None:
