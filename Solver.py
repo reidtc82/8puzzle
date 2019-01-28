@@ -24,6 +24,7 @@ class solver_iterative_deepening:
         self.start_state = startingState
         self.win = False
         self.maxQueueLen = 0
+        self.maxVisited = 0
         self.heuristic = heuristic
 
 
@@ -39,15 +40,15 @@ class solver_iterative_deepening:
         for i in range(math.factorial(9)):
             # print('made it here')
             if time.time() - t0 > 300:
-                print('Queue length {0}'.format(self.maxQueueLen))
-                print('visited count {0}'.format(len(self.visited)))
+                print('Queue length so far {0}'.format(self.maxQueueLen))
+                print('visited count so far {0}'.format(self.maxVisited))
                 print('Iterative deepening exceeded 5 minutes. Stopping')
                 break
 
             while not self.is_empty(self.queue):
                 if time.time() - t0 > 300:
-                    print('Queue length {0}'.format(self.maxQueueLen))
-                    print('visited count {0}'.format(len(self.visited)))
+                    print('Queue length so far {0}'.format(self.maxQueueLen))
+                    print('visited count so far {0}'.format(self.maxVisited))
                     print('Iterative deepening exceeded 5 minutes. Stopping')
                     break
 
@@ -59,6 +60,8 @@ class solver_iterative_deepening:
                 current_depth = currentState.getDepth()
 
                 self.visited.add(repr(currentState.getState()))
+                if self.maxVisited < len(self.visited):
+                    self.maxVisited = len(self.visited)
 
                 if self.moves%1000 == 0:
                     print("Yes I'm still working current queue length: {0}".format(len(self.queue)))
@@ -66,7 +69,7 @@ class solver_iterative_deepening:
                 if np.allclose(self.goalState.getState(), currentState.getState()):
                     print('***********end*************')
                     print('Queue length {0}'.format(self.maxQueueLen))
-                    print('visited count {0}'.format(len(self.visited)))
+                    print('visited count {0}'.format(self.maxVisited))
                     self.win = True
                     self.returnPath(currentState)
                     break
@@ -207,7 +210,8 @@ class solver_FIFO:
     queue = []
     pathTree = dict()
     path = []
-
+    steps = 0
+    
     def __init__(self, startingState, goalState, useTileWeights, heuristic):
         self.queue.append(startingState)
         self.goalState = goalState
@@ -462,7 +466,7 @@ class solver_depthFirst:
                 break
 
             if self.moves%1000 == 0:
-                print("Yes I'm still working current moves: {0} ".format(self.moves)+" current queue length: {0}".format(len(self.queue)))
+                print("Yes I'm still working current queue length: {0}".format(len(self.queue)))
 
             if len(self.queue) > self.maxQueueLen:
                 self.maxQueueLen = len(self.queue)

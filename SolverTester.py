@@ -24,23 +24,23 @@ def print_the_solution(solution):
 # Set final arg to True to do Uniform-Cost
 
 # breadth-first - dont use tile weights and no heuristic
-# print('\nStarting breadth-first easy')
-# d_solver = solver_FIFO(easyStart,winningState,False,None)
-# d_solver.solve()
-# print_the_solution(d_solver.get_path())
-# print('Path steps {0}'.format(d_solver.get_steps()))
-#
-# print('\nStarting breadth-first med')
-# d_solver = solver_FIFO(medStart,winningState,False,None)
-# d_solver.solve()
-# print_the_solution(d_solver.get_path())
-# print('Path steps {0}'.format(d_solver.get_steps()))
-#
-# print('\nStarting breadth-first hard')
-# d_solver = solver_FIFO(hardStart,winningState,False,None)
-# d_solver.solve()
-# print_the_solution(d_solver.get_path())
-# print('Path steps {0}'.format(d_solver.get_steps()))
+print('\nStarting breadth-first easy')
+d_solver = solver_FIFO(easyStart,winningState,False,None)
+d_solver.solve()
+print_the_solution(d_solver.get_path())
+print('Path steps {0}'.format(d_solver.get_steps()))
+
+print('\nStarting breadth-first med')
+d_solver = solver_FIFO(medStart,winningState,False,None)
+d_solver.solve()
+print_the_solution(d_solver.get_path())
+print('Path steps {0}'.format(d_solver.get_steps()))
+
+print('\nStarting breadth-first hard')
+d_solver = solver_FIFO(hardStart,winningState,False,None)
+d_solver.solve()
+print_the_solution(d_solver.get_path())
+print('Path steps {0}'.format(d_solver.get_steps()))
 
 # depth-first - dont use tile weights? If true it will tally but notuse them for next path to check.
 print('\nStarting depth-first easy')
