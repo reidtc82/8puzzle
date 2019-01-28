@@ -22,6 +22,8 @@ class solver_iterative_deepening:
         self.moves = 0
         self.start_state = startingState
         self.win = False
+        self.maxQueueLen = 0
+
         if heuristic:
             if heuristic == Heuristic.iterative_deepening:
                 self.rangeStart = 0
@@ -35,16 +37,28 @@ class solver_iterative_deepening:
         current_depth = 0
 
         for i in range(math.factorial(9)):
+            if time.time() - t0 > 300:
+                print('Queue length {0}'.format(len(self.queue)))
+                print('visited count {0}'.format(len(self.visited)))
+                print('Iterative deepening exceeded 5 minutes. Stopping')
+                break
 
             while not self.is_empty(self.queue):
+                if time.time() - t0 > 300:
+                    print('Queue length {0}'.format(len(self.queue)))
+                    print('visited count {0}'.format(len(self.visited)))
+                    print('Iterative deepening exceeded 5 minutes. Stopping')
+                    break
 
+                if len(self.queue) > self.maxQueueLen:
+                    self.maxQueueLen = len(self.queue)
                 currentState = self.queue.pop(0)
                 self.queue_track.remove(repr(currentState.getState()))
                 current_depth = currentState.getDepth()
 
                 self.visited.add(repr(currentState.getState()))
 
-                if self.moves%1 == 0:
+                if self.moves%1000 == 0:
                     print("Yes I'm still working current current: "+str(currentState)+" current i: {0} ".format(i)+" current queue length: {0}".format(len(self.queue))+" current depth: {0}".format(current_depth))
 
                 if np.allclose(self.goalState.getState(), currentState.getState()):
@@ -54,9 +68,7 @@ class solver_iterative_deepening:
                     break
                 elif current_depth < i:
                     for child in self.successors(currentState):
-
                         if not self.check_visited(child):
-
                             if not self.check_queue(child):
                                 #store info from when created in successor funciton.
                                 self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
@@ -66,12 +78,14 @@ class solver_iterative_deepening:
 
                 self.moves += 1
 
-            self.start_again()
+            if not self.win:
+                self.start_again()
+            else:
+                break
 
     def start_again(self):
         if not self.win:
             #start over
-            print('starting again')
             self.reset_start_state()
             self.queue.append(self.start_state)
             self.queue_track.add(repr(self.start_state.getState()))
@@ -84,7 +98,6 @@ class solver_iterative_deepening:
         self.start_state.setDirection(None)
         self.start_state.setParent(None)
         self.start_state.set_depth(0)
-        print(self.start_state.getDepth())
 
     def check_visited(self, child):
         result = False
@@ -163,9 +176,7 @@ class solver_iterative_deepening:
         return successors
 
     def returnPath(self, node):
-        #returns list of dicts to use to define solution. Evrything should be in visited
-
-        print(self.pathTree[node]['parent'])
+        # creates list of dicts to use to define solution. Evrything should be in visited
         while self.pathTree[node]['parent'] != None:
             self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
             node = self.pathTree[node]['parent']
@@ -192,13 +203,22 @@ class solver_depthFirst:
         self.useTileWeights = useTileWeights
         self.pathTree[startingState] = {'parent':startingState.getParent(), 'cost':startingState.getCost()}
         self.moves = 0
+        self.maxQueueLen = 0
 
     def solve(self):
         t0 = time.time()
         while not self.is_empty(self.queue):
-            if self.moves%10000 == 0:
+            if time.time() - t0 > 300:
+                print('Queue length {0}'.format(len(self.queue)))
+                print('visited count {0}'.format(len(self.visited)))
+                print('DFS exceeded 5 minutes. Stopping')
+                break
+
+            if self.moves%1000 == 0:
                 print("Yes I'm still working current moves: {0} ".format(self.moves)+" current queue length: {0}".format(len(self.queue)))
 
+            if len(self.queue) > self.maxQueueLen:
+                self.maxQueueLen = len(self.queue)
             currentState = self.queue.pop(0)
             self.queue_track.remove(repr(currentState.getState()))
 
@@ -323,11 +343,20 @@ class solver_FIFO:
         self.maxQueueLen = 0
 
     def solve(self):
+        t0 = time.time()
         while len(self.queue) != 0:
+            if time.time() - t0 > 300:
+                print('Queue length {0}'.format(len(self.queue)))
+                print('visited count {0}'.format(len(self.visited)))
+                print('FIFO - Whichever one this is - exceeded 5 minutes. Stopping')
+                break
+
+            if self.moves%100 == 0:
+                print('Yes Im still working: {0}'.format(self.moves))
+
             if len(self.queue) > self.maxQueueLen:
                 self.maxQueueLen = len(self.queue)
-            print('Queue length {0}'.format(len(self.queue)))
-            print('visited count {0}'.format(len(self.visited)))
+
             currentState = self.queue.pop(self.find_lowest_cost_index())
 
             self.visited.append(currentState)
@@ -343,7 +372,6 @@ class solver_FIFO:
                     if not self.check_visited(child):
                         #store info from when created in successor funciton.
                         if not self.check_queue(child):
-                            print('Im not queued')
                             if not self.heuristic:
                                 self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
                             else:
@@ -355,7 +383,6 @@ class solver_FIFO:
                                 if np.allclose(q.getState(), child.getState()):
                                     if self.heuristic == None:
                                         if child.getCost() < q.getCost(): #if its <= then breadth first will mess up
-                                            print('found a cheaper one')
                                             q.setCost(child.getCost())
                                             q.setParent(child.getParent())
                                             q.setDirection(child.getDirection())
@@ -363,7 +390,6 @@ class solver_FIFO:
 
                                     else:
                                         if child.get_h_cost() < q.get_h_cost():
-                                            print('found a cheaper one')
                                             q.setCost(child.getCost())
                                             q.setParent(child.getParent())
                                             q.setDirection(child.getDirection())
