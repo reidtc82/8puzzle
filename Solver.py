@@ -7,6 +7,7 @@ import time
 import math
 
 # Im a bit all over the place when it comes to style and OOP-ness.
+# Sorry for not refactoring all the shared code between classes into a utility package
 
 class solver_iterative_deepening:
     # Just the class
@@ -101,14 +102,18 @@ class solver_iterative_deepening:
                     self.returnPath(currentState)
                     break
                 elif current_depth < i:
-                # Nope, didnt win
+                # Nope, didnt win and we are still OK to keep adding to the queue
                     for child in self.successors(currentState):
+                        # Have some children
                         if not self.check_visited(child):
+                            # check in visited
                             if not self.check_queue(child):
-                                #store info from when created in successor funciton.
+                                # check in queued
+                                # store info from when created in successor funciton.
                                 self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
-                                #append because breadth first. Use insert for depth first.
+                                # append because breadth first. Use insert for depth first.
                                 self.queue.insert(0, child)
+                                # queue_track doesnt need to be in order
                                 self.queue_track.add(repr(child.getState()))
 
                 self.moves += 1
@@ -119,6 +124,8 @@ class solver_iterative_deepening:
                 break
 
     def start_again(self):
+        # Start all the queues over
+        # uhg double checking for no reason
         if not self.win:
             #start over
             self.reset_start_state()
@@ -129,12 +136,15 @@ class solver_iterative_deepening:
             self.visited.clear()
 
     def reset_start_state(self):
+        # Just a utility for restarting
         self.start_state.setCost(0)
         self.start_state.setDirection(None)
         self.start_state.setParent(None)
         self.start_state.set_depth(0)
 
     def check_visited(self, child):
+        # OK so this ended up being the fastest way to determine if child was in visited
+        # that my skills allowed me to implement in the time given
         result = False
 
         if repr(child.getState()) in self.visited:
@@ -143,6 +153,8 @@ class solver_iterative_deepening:
         return result
 
     def check_queue(self, child):
+        # OK so this ended up being the fastest way to determine if child was in queued
+        # that my skills allowed me to implement in the time given
         result = False
 
         if repr(child.getState()) in self.queue_track:
@@ -151,6 +163,7 @@ class solver_iterative_deepening:
         return result
 
     def successors(self, root):
+        # Successor function if it wasnt obvious.
         successors = []
         zero_x = root.getZeroLocation()['col']
         zero_y = root.getZeroLocation()['row']
@@ -163,6 +176,10 @@ class solver_iterative_deepening:
         newDState = deepcopy(temp)
         #inverted y axis
 
+        # Just checking row or column depending on which direction to move
+        # then if its ok to move in that direction do so with a simple swap
+        # calculate the cost and build the new state object
+        # add it to a mini queue that gets returned to the main loop
         if zero_x != 0:
             #take left child
             leftTile = newLState[zero_x-1][zero_y]
@@ -174,6 +191,10 @@ class solver_iterative_deepening:
 
             successors.insert(0,leftNew)
 
+        # Just repeates for Left, Right, Up, Down
+        # The order of this does change the runtime
+        # Sort of pointless to try to order these to run faster for this particular
+        # collection of start and win states though.
         if zero_x != 2:
             #take right child
             rightTile = newRState[zero_x+1][zero_y]
@@ -213,6 +234,7 @@ class solver_iterative_deepening:
     def returnPath(self, node):
         # creates list of dicts to use to define solution. Evrything should be in visited
         steps = 0
+        # This or recursive, doesnt relaly matter. Just builds out the solution tree for whatever later use
         while self.pathTree[node]['parent']:
             steps += 1
             self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
@@ -220,19 +242,27 @@ class solver_iterative_deepening:
 
         self.set_steps(steps)
 
+    # Accessor functions
     def get_path(self):
+        # Return the final path assuming it finished and could consruct the whole thing
         return self.path
 
     def is_empty(self,ls):
+        # Utility to check queue being empty and stop main loop
         return False if ls else True
 
     def set_steps(self, steps):
+        # Utility for counting the steps fo the final path
         self.steps = steps
 
     def get_steps(self):
+        # Returns the steps of the final path
         return self.steps
 
 #----------------------------------------------------
+# Multi-dipped for this one
+# These are all memory intensive really
+# They are all greedy, taking the lowest cost or heuristic cost for the next node to explore
 class solver_FIFO:
     visited = []
     queue = []
@@ -241,6 +271,8 @@ class solver_FIFO:
     steps = 0
 
     def __init__(self, startingState, goalState, useTileWeights, heuristic):
+        # Constructor - useTileWeights and heuristic to determine which search
+        # strategy to use - See Heuristic enum for options here
         self.queue.append(startingState)
         self.goalState = goalState
         self.useTileWeights = useTileWeights
@@ -252,23 +284,31 @@ class solver_FIFO:
     def solve(self):
         t0 = time.time()
         while len(self.queue) != 0:
+            # Inside main loop for BFS and variants
             if time.time() - t0 > 300:
+                # kill switch
                 print('Queue length {0}'.format(self.maxQueueLen))
                 print('visited count {0}'.format(len(self.visited)))
                 print('FIFO - Whichever one this is - exceeded 5 minutes. Stopping')
                 break
 
+            # sanity checking
             if self.moves%100 == 0:
                 print('Yes Im still working: {0}'.format(self.moves))
 
+            # tracking for reporting
             if len(self.queue) > self.maxQueueLen:
                 self.maxQueueLen = len(self.queue)
 
+            # Popping the node with the index that is returned
+            # I could sort but if I jsut give it the lowest its a little faster I think
+            # Sorting would take more operations, finding the lowest takes a single pass through the queue
             currentState = self.queue.pop(self.find_lowest_cost_index())
 
             self.visited.append(currentState)
 
             if np.allclose(self.goalState.getState(), currentState.getState()):
+                # We won
                 print('***********end*************')
                 print('visited count {0}'.format(len(self.visited)))
                 print('max queue length {0}'.format(self.maxQueueLen))
@@ -276,19 +316,28 @@ class solver_FIFO:
                 break
             else:
                 for child in self.successors(currentState):
+                    # Have some children
                     if not self.check_visited(child):
-                        #store info from when created in successor funciton.
+                        # check in visited
                         if not self.check_queue(child):
+                            # check in queue
                             if not self.heuristic:
+                                # no heuristic then we dont really need ot store the heuristic cost
                                 self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
                             else:
+                                # otehrwise we can but it doesn treally get used Im now realizing
                                 self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection(), 'heuristic':child.get_h_cost()}
                             # append because breadth first. Use insert for depth first.
                             self.queue.append(child)
                         else:
+                            # If the child was not in visitied but was in queued then we just replace the values for the object
+                            # rather than add and delete stuff
+                            # if it was visited then we dont care because it already had all its children and would have
+                            # already explored it form the cheapest path
                             for q in self.queue:
                                 if np.allclose(q.getState(), child.getState()):
                                     if self.heuristic == None:
+                                        # no heuristic
                                         if child.getCost() < q.getCost(): #if its <= then breadth first will mess up
                                             q.setCost(child.getCost())
                                             q.setParent(child.getParent())
@@ -296,6 +345,7 @@ class solver_FIFO:
                                             self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection()}
 
                                     else:
+                                        # heuristic
                                         if child.get_h_cost() < q.get_h_cost():
                                             q.setCost(child.getCost())
                                             q.setParent(child.getParent())
@@ -303,6 +353,7 @@ class solver_FIFO:
                                             q.set_h_cost(child.get_h_cost())
                                             self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection(), 'heuristic':q.get_h_cost()}
 
+                    # now we have finished visiting it
                     self.visited.append(currentState)
 
             self.moves += 1
