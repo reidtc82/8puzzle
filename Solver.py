@@ -293,7 +293,7 @@ class solver_FIFO:
                 break
 
             # sanity checking
-            if self.moves%100 == 0:
+            if self.moves%1000 == 0:
                 print('Yes Im still working: {0}'.format(self.moves))
 
             # tracking for reporting
