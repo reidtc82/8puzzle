@@ -1,5 +1,7 @@
 from enum import Enum
 
+# enum enumerating heuristics 
+
 class Heuristic(Enum):
     misplaced_tiles = 0
     a_star_1 = 1

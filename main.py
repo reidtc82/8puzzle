@@ -6,14 +6,19 @@ else:
     # for Python2
     from Tkinter import *   ## notice capitalized T in Tkinter
 
-# from tkinter import Tk, Label, Button, Canvas
+# This is not really part of the assignment
+# I meant to incorporate the search algorithms to let the computer solve the problem
+# At least it helped me visualize the problem
+# repeat - this part does not support the search algorithms, but if youre bored play away
 
 from PuzzleBoard import PuzzleBoard
 from State import State
 import numpy as np
 
 class Main:
+    # just a main class
     def __init__(self, master):
+        # constructor
         self.canvas_width = 300
         self.canvas_height = 300
         self.rectangles = [0] *8
@@ -21,6 +26,7 @@ class Main:
 
         self.board = PuzzleBoard()
 
+        # setting up the tkinter GUI
         self.master = master
         master.title("8 Puzzle")
         master.geometry('640x480')
@@ -55,6 +61,7 @@ class Main:
         self.right_button = Button(master, text="Right", command=self.moveRight)
         self.right_button.pack()
 
+    # processing button clicks
     def moveRight(self):
         self.board.moveRight()
         self.score.config(text=self.board.getScore())
@@ -82,6 +89,7 @@ class Main:
         self.score.config(text=self.board.getScore())
         self.drawBoard(self.canvasSpace)
 
+    # drawing the board after every click
     def drawBoard(self, canvas):
         for rec in self.rectangles:
             canvas.delete(rec)

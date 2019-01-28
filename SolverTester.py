@@ -4,6 +4,8 @@ from copy import deepcopy
 from Heuristic import Heuristic
 import time
 
+# You can just run this file and get everything. Output isnt the best.
+
 easyStart = State([[1,8,7],[3,6,0],[4,2,5]],0,[],None,0)
 medStart = State([[2,0,7],[8,4,6],[1,3,5]],0,[],None,0)
 hardStart = State([[5,4,3],[6,0,2],[7,8,1]],0,[],None,0)

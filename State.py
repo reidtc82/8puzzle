@@ -1,5 +1,8 @@
+# State class
+
 class State:
     def __init__(self, state, cost, parent, dir, dep):
+        # constructor
         self.state = state
         self.cost = cost
         self.parent = parent
@@ -11,6 +14,7 @@ class State:
     # def __eq__(self, notSelf):
     #     return self.state == notSelf.getState() and self.cost == notSelf.getCost() and self.parent == notSelf.getParent()
 
+    # standard accessors
     def getState(self):
         return self.state
 
@@ -26,6 +30,7 @@ class State:
     def setParent(self, parent):
         self.parent = parent
 
+    # for the GUI
     def getZeroLocation(self):
         for i in range(3):
             for j in range(3):

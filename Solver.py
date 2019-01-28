@@ -359,17 +359,20 @@ class solver_FIFO:
             self.moves += 1
 
     def _heuristic(self, h, state):
+        # heuristic definitions are here
         s1 = state.getState()
         s2 = self.goalState.getState()
         result = 0
-        # seems like I shouldnt could 0 position
+        # seems like I shouldnt count 0 position
         if h == Heuristic.misplaced_tiles or h == Heuristic.a_star_1:
+            # Either heuristic use misplaced tiles per the assignment
             for i in range(3):
                 for j in range(3):
                     if s1[i][j] != s2[i][j]:
                         result += 1
             if h == Heuristic.a_star_1:
                 # this should be sum of move costs = 1 if A*1 was called with correct args
+                # if it happens to be A*1 then we also add in the state cost passed in
                 result += state.getCost()
 
         elif h == Heuristic.a_star_2:
@@ -378,11 +381,13 @@ class solver_FIFO:
 
         elif h == Heuristic.a_star_3:
             # I feel like this is cheating but it works.
+            # Alternative would be to assess collisions along rows and columns but I ran out of time
             result += self.sum_of_manhattan_distance(s1, s2)+state.getCost()
 
         return result
 
     def sum_of_manhattan_distance(self, s1, s2):
+        # Utility to calculate Manhattan distance
         mD = [0] *9
         result = 0
         for i in range(3):
@@ -402,19 +407,22 @@ class solver_FIFO:
         return result
 
     def find_lowest_cost_index(self):
+        # Instead of sorting the queue every time Im just doing a single pass and finding the lowest cost
+        # then returning the IndexError
+        # It does get burdensome when the queue gets long and now realizing that if I did an
+        # insertion sort while putting the children into the queue I might save some time
         lowest = 0
         for i in range(len(self.queue)):
-            # print(self.heuristic(self.queue[i].getState()))
             if self.heuristic:
                 if self.queue[i].get_h_cost() < self.queue[lowest].get_h_cost():
                     lowest = i
             else:
                 if self.queue[i].getCost() < self.queue[lowest].getCost():
-                    # print('Im the cheapest {0}'.format(i)+' of queue length {0}'.format(len(self.queue)))
                     lowest = i
         return lowest
 
     def check_visited(self, child):
+        # Slow version of checking if child is in visited
         result = False
         for v in self.visited:
             if np.allclose(v.getState(), child.getState()):
@@ -423,6 +431,7 @@ class solver_FIFO:
         return result
 
     def check_queue(self, child):
+        # Slow version of checking if child is in queued
         result = False
         for cq in self.queue:
             if np.allclose(cq.getState(), child.getState()):
@@ -431,6 +440,7 @@ class solver_FIFO:
         return result
 
     def successors(self, root):
+        # Same successor function as previous class but this time with accomodations for the heuristic costs
         successors = []
         zero_x = root.getZeroLocation()['col']
         zero_y = root.getZeroLocation()['row']
@@ -443,19 +453,25 @@ class solver_FIFO:
         newDState = deepcopy(temp)
         #inverted y axis
 
+        # Doing the same thing as iterative deepening
         if zero_x != 0:
             #take left child
             leftTile = newLState[zero_x-1][zero_y]
             newLState[zero_x-1][zero_y] = 0
             newLState[zero_x][zero_y] = leftTile
 
+            # get teh cost based on parameters passed to constructor
             cost = leftTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             leftNew = State(newLState,cost,root,Direction.LEFT,depth)
+            # then I get the heuristic cost based on that parameter
+            # A little meta here passing itself to a function passed to a function of itself
+            # probably bad practice
             leftNew.set_h_cost(self._heuristic(self.heuristic, leftNew))
 
             successors.append(leftNew)
             del leftNew
 
+        # Repeat for Left, Right, Up, Down
         if zero_x != 2:
             #take right child
             rightTile = newRState[zero_x+1][zero_y]
@@ -499,6 +515,7 @@ class solver_FIFO:
 
     def returnPath(self, node):
         # creates list of dicts to use to define solution. Evrything should be in visited
+        # Same as before
         steps = 0
         while self.pathTree[node]['parent']:
             steps += 1
@@ -507,6 +524,7 @@ class solver_FIFO:
 
         self.set_steps(steps)
 
+    # Utilities below are the same as DFS and IDS
     def get_path(self):
         return self.path
 
@@ -518,6 +536,7 @@ class solver_FIFO:
 
 
 #----------------------------------------------------
+# Had to make this separate from IDS unlike BFS variants
 class solver_depthFirst:
     visited = set()
     queue = []
@@ -527,6 +546,7 @@ class solver_depthFirst:
     steps = 0
 
     def __init__(self, startingState, goalState, useTileWeights):
+        # Constructor
         self.queue.append(startingState)
         self.queue_track.add(repr(startingState.getState()))
         self.goalState = goalState
@@ -538,28 +558,37 @@ class solver_depthFirst:
     def solve(self):
         t0 = time.time()
         while not self.is_empty(self.queue):
+            # In main loop
             if time.time() - t0 > 300:
+                # kill switch
                 print('Queue length {0}'.format(self.maxQueueLen))
                 print('visited count {0}'.format(len(self.visited)))
                 print('DFS exceeded 5 minutes. Stopping')
                 break
 
+            # sanity checking
             if self.moves%1000 == 0:
                 print("Yes I'm still working current queue length: {0}".format(len(self.queue)))
 
+            # performance reporting
             if len(self.queue) > self.maxQueueLen:
                 self.maxQueueLen = len(self.queue)
+
+            # get next on the queue
             currentState = self.queue.pop(0)
             self.queue_track.remove(repr(currentState.getState()))
 
             self.visited.add(repr(currentState.getState()))
             if np.allclose(self.goalState.getState(), currentState.getState()):
+                # win, yay
                 print('***********end*************')
                 print('Queue length {0}'.format(self.maxQueueLen))
                 print('visited count {0}'.format(len(self.visited)))
                 self.returnPath(currentState)
                 break
             else:
+                # make children as previous methods do
+                # then check if they are in queue and visited
                 for child in self.successors(currentState):
                     if not self.check_visited(child):
                         if not self.check_queue(child):
@@ -573,6 +602,8 @@ class solver_depthFirst:
 
 
     def check_visited(self, child):
+        # fast version because lots of checks
+        # see IDS for more info
         result = False
 
         if repr(child.getState()) in self.visited:
@@ -581,6 +612,8 @@ class solver_depthFirst:
         return result
 
     def check_queue(self, child):
+        # fast version because lots of checking
+        # see IDS because my implementation kinda sucks
         result = False
 
         if repr(child.getState()) in self.queue_track:
@@ -588,6 +621,8 @@ class solver_depthFirst:
         return result
 
     def successors(self, root):
+        # same as before but no accomodations for heuristics
+        # just vanilla DFS successor function
         successors = []
         zero_x = root.getZeroLocation()['col']
         zero_y = root.getZeroLocation()['row']
@@ -600,17 +635,20 @@ class solver_depthFirst:
         newDState = deepcopy(temp)
         #inverted y axis
 
+        # does the same as the others
         if zero_x != 0:
             #take left child
             leftTile = newLState[zero_x-1][zero_y]
             newLState[zero_x-1][zero_y] = 0
             newLState[zero_x][zero_y] = leftTile
 
+            # costs are calculated and new child states created if they can be
             cost = leftTile+root.getCost() if self.useTileWeights else 1+root.getCost()
             leftNew = State(newLState,cost,root,Direction.LEFT,depth)
 
             successors.insert(0,leftNew)
 
+        # repeat left, right, up, down
         if zero_x != 2:
             #take right child
             rightTile = newRState[zero_x+1][zero_y]
@@ -648,6 +686,7 @@ class solver_depthFirst:
 
     def returnPath(self, node):
         # creates list of dicts to use to define solution. Evrything should be in visited
+        # same as above. SOrry again for not refactoring into unified utility package
         steps = 0
         while self.pathTree[node]['parent']:
             steps += 1
@@ -656,6 +695,8 @@ class solver_depthFirst:
 
         self.set_steps(steps)
 
+    # more utilites and accessors same as above
+    # getting paths and steps and checkig for empty queue
     def get_path(self):
         return self.path
 
