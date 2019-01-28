@@ -12,6 +12,7 @@ class solver_iterative_deepening:
     queue_track = set()
     pathTree = dict()
     path = []
+    steps = 0
 
     def __init__(self, startingState, goalState, useTileWeights, heuristic):
         self.queue.append(startingState)
@@ -23,20 +24,20 @@ class solver_iterative_deepening:
         self.start_state = startingState
         self.win = False
         self.maxQueueLen = 0
+        self.heuristic = heuristic
 
-        if heuristic:
-            if heuristic == Heuristic.iterative_deepening:
-                self.rangeStart = 0
-            else:
-                raise Exception('Only acceptable heuristics for LIFO are iterative_deepening or None')
-        else:
-            self.rangeStart = math.factorial(9)
 
     def solve(self):
         t0 = time.time()
         current_depth = 0
 
+        # if self.heuristic == Heuristic.iterative_deepening:
+        #     self.rangeStart = range(math.factorial(9))
+        # else:
+        #     self.rangeStart = range(math.factorial(9)-1,math.factorial(9))
+
         for i in range(math.factorial(9)):
+            # print('made it here')
             if time.time() - t0 > 300:
                 print('Queue length {0}'.format(len(self.queue)))
                 print('visited count {0}'.format(len(self.visited)))
@@ -59,10 +60,12 @@ class solver_iterative_deepening:
                 self.visited.add(repr(currentState.getState()))
 
                 if self.moves%1000 == 0:
-                    print("Yes I'm still working current current: "+str(currentState)+" current i: {0} ".format(i)+" current queue length: {0}".format(len(self.queue))+" current depth: {0}".format(current_depth))
+                    print("Yes I'm still working  current queue length: {0}".format(len(self.queue)))
 
                 if np.allclose(self.goalState.getState(), currentState.getState()):
                     print('***********end*************')
+                    print('Queue length {0}'.format(len(self.queue)))
+                    print('visited count {0}'.format(len(self.visited)))
                     self.win = True
                     self.returnPath(currentState)
                     break
@@ -177,9 +180,13 @@ class solver_iterative_deepening:
 
     def returnPath(self, node):
         # creates list of dicts to use to define solution. Evrything should be in visited
-        while self.pathTree[node]['parent'] != None:
+        steps = 0
+        while self.pathTree[node]['parent']:
+            steps += 1
             self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
             node = self.pathTree[node]['parent']
+
+        self.set_steps(steps)
 
     def get_path(self):
         return self.path
@@ -187,146 +194,13 @@ class solver_iterative_deepening:
     def is_empty(self,ls):
         return False if ls else True
 
-#----------------------------------------------------
+    def set_steps(self, steps):
+        self.steps = steps
 
-class solver_depthFirst:
-    visited = set()
-    queue = []
-    queue_track = set()
-    pathTree = dict()
-    path = []
-
-    def __init__(self, startingState, goalState, useTileWeights):
-        self.queue.append(startingState)
-        self.queue_track.add(repr(startingState.getState()))
-        self.goalState = goalState
-        self.useTileWeights = useTileWeights
-        self.pathTree[startingState] = {'parent':startingState.getParent(), 'cost':startingState.getCost()}
-        self.moves = 0
-        self.maxQueueLen = 0
-
-    def solve(self):
-        t0 = time.time()
-        while not self.is_empty(self.queue):
-            if time.time() - t0 > 300:
-                print('Queue length {0}'.format(len(self.queue)))
-                print('visited count {0}'.format(len(self.visited)))
-                print('DFS exceeded 5 minutes. Stopping')
-                break
-
-            if self.moves%1000 == 0:
-                print("Yes I'm still working current moves: {0} ".format(self.moves)+" current queue length: {0}".format(len(self.queue)))
-
-            if len(self.queue) > self.maxQueueLen:
-                self.maxQueueLen = len(self.queue)
-            currentState = self.queue.pop(0)
-            self.queue_track.remove(repr(currentState.getState()))
-
-            self.visited.add(repr(currentState.getState()))
-            if np.allclose(self.goalState.getState(), currentState.getState()):
-                print('***********end*************')
-                self.returnPath(currentState)
-                break
-            else:
-                for child in self.successors(currentState):
-                    if not self.check_visited(child):
-                        if not self.check_queue(child):
-                            #store info from when created in successor funciton.
-                            self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
-                            #append because breadth first. Use insert for depth first.
-                            self.queue.insert(0, child)
-                            self.queue_track.add(repr(child.getState()))
-
-            self.moves += 1
-
-
-    def check_visited(self, child):
-        result = False
-
-        if repr(child.getState()) in self.visited:
-            result = True
-
-        return result
-
-    def check_queue(self, child):
-        result = False
-
-        if repr(child.getState()) in self.queue_track:
-            result = True
-        return result
-
-    def successors(self, root):
-        successors = []
-        zero_x = root.getZeroLocation()['col']
-        zero_y = root.getZeroLocation()['row']
-        temp = root.getState()#wtf python?! I couldnt just pass root.getState() to deepcopy, no, that didnt make a copy. I had to do it like this...
-        depth = 1
-        # dont forget to go back and deal with all these ridiculous variables
-        newLState = deepcopy(temp)
-        newRState = deepcopy(temp)
-        newUState = deepcopy(temp)
-        newDState = deepcopy(temp)
-        #inverted y axis
-
-        if zero_x != 0:
-            #take left child
-            leftTile = newLState[zero_x-1][zero_y]
-            newLState[zero_x-1][zero_y] = 0
-            newLState[zero_x][zero_y] = leftTile
-
-            cost = leftTile+root.getCost() if self.useTileWeights else 1+root.getCost()
-            leftNew = State(newLState,cost,root,Direction.LEFT,depth)
-
-            successors.insert(0,leftNew)
-
-        if zero_x != 2:
-            #take right child
-            rightTile = newRState[zero_x+1][zero_y]
-            newRState[zero_x+1][zero_y] = 0
-            newRState[zero_x][zero_y] = rightTile
-
-            cost = rightTile+root.getCost() if self.useTileWeights else 1+root.getCost()
-            rightNew = State(newRState,cost,root,Direction.RIGHT,depth)
-
-            successors.insert(0,rightNew)
-
-        if zero_y != 0:
-            #take upper child
-            upTile = newUState[zero_x][zero_y-1]
-            newUState[zero_x][zero_y-1] = 0
-            newUState[zero_x][zero_y] = upTile
-
-            cost = upTile+root.getCost() if self.useTileWeights else 1+root.getCost()
-            upNew = State(newUState,cost,root,Direction.UP,depth)
-
-            successors.insert(0,upNew)
-
-        if zero_y != 2:
-            #take lower child
-            downTile = newDState[zero_x][zero_y+1]
-            newDState[zero_x][zero_y+1] = 0
-            newDState[zero_x][zero_y] = downTile
-
-            cost = downTile+root.getCost() if self.useTileWeights else 1+root.getCost()
-            downNew = State(newDState,cost,root,Direction.DOWN,depth)
-
-            successors.insert(0,downNew)
-
-        return successors
-
-    def returnPath(self, node):
-        while self.pathTree[node]['parent'] != []:
-            self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
-            node = self.pathTree[node]['parent']
-
-    def get_path(self):
-        return self.path
-
-    def is_empty(self,ls):
-        return False if ls else True
+    def get_steps(self):
+        return self.steps
 
 #----------------------------------------------------
-
 class solver_FIFO:
     visited = []
     queue = []
@@ -540,10 +414,170 @@ class solver_FIFO:
         return successors
 
     def returnPath(self, node):
-        #returns list of dicts to use to define solution. Evrything should be in visited
-        self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
-        if self.pathTree[node]['parent'] != []:
-            self.returnPath(self.pathTree[node]['parent'])
+        # creates list of dicts to use to define solution. Evrything should be in visited
+        steps = 0
+        while self.pathTree[node]['parent']:
+            steps += 1
+            self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
+            node = self.pathTree[node]['parent']
+
+        self.set_steps(steps)
 
     def get_path(self):
         return self.path
+
+    def set_steps(self, steps):
+        self.steps = steps
+
+    def get_steps(self):
+        return self.steps
+
+
+#----------------------------------------------------
+class solver_depthFirst:
+    visited = set()
+    queue = []
+    queue_track = set()
+    pathTree = dict()
+    path = []
+    steps = 0
+    
+    def __init__(self, startingState, goalState, useTileWeights):
+        self.queue.append(startingState)
+        self.queue_track.add(repr(startingState.getState()))
+        self.goalState = goalState
+        self.useTileWeights = useTileWeights
+        self.pathTree[startingState] = {'parent':startingState.getParent(), 'cost':startingState.getCost()}
+        self.moves = 0
+        self.maxQueueLen = 0
+
+    def solve(self):
+        t0 = time.time()
+        while not self.is_empty(self.queue):
+            if time.time() - t0 > 300:
+                print('Queue length {0}'.format(len(self.queue)))
+                print('visited count {0}'.format(len(self.visited)))
+                print('DFS exceeded 5 minutes. Stopping')
+                break
+
+            if self.moves%1000 == 0:
+                print("Yes I'm still working current moves: {0} ".format(self.moves)+" current queue length: {0}".format(len(self.queue)))
+
+            if len(self.queue) > self.maxQueueLen:
+                self.maxQueueLen = len(self.queue)
+            currentState = self.queue.pop(0)
+            self.queue_track.remove(repr(currentState.getState()))
+
+            self.visited.add(repr(currentState.getState()))
+            if np.allclose(self.goalState.getState(), currentState.getState()):
+                print('***********end*************')
+                self.returnPath(currentState)
+                break
+            else:
+                for child in self.successors(currentState):
+                    if not self.check_visited(child):
+                        if not self.check_queue(child):
+                            #store info from when created in successor funciton.
+                            self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection()}
+                            #append because breadth first. Use insert for depth first.
+                            self.queue.insert(0, child)
+                            self.queue_track.add(repr(child.getState()))
+
+            self.moves += 1
+
+
+    def check_visited(self, child):
+        result = False
+
+        if repr(child.getState()) in self.visited:
+            result = True
+
+        return result
+
+    def check_queue(self, child):
+        result = False
+
+        if repr(child.getState()) in self.queue_track:
+            result = True
+        return result
+
+    def successors(self, root):
+        successors = []
+        zero_x = root.getZeroLocation()['col']
+        zero_y = root.getZeroLocation()['row']
+        temp = root.getState()#wtf python?! I couldnt just pass root.getState() to deepcopy, no, that didnt make a copy. I had to do it like this...
+        depth = 1
+        # dont forget to go back and deal with all these ridiculous variables
+        newLState = deepcopy(temp)
+        newRState = deepcopy(temp)
+        newUState = deepcopy(temp)
+        newDState = deepcopy(temp)
+        #inverted y axis
+
+        if zero_x != 0:
+            #take left child
+            leftTile = newLState[zero_x-1][zero_y]
+            newLState[zero_x-1][zero_y] = 0
+            newLState[zero_x][zero_y] = leftTile
+
+            cost = leftTile+root.getCost() if self.useTileWeights else 1+root.getCost()
+            leftNew = State(newLState,cost,root,Direction.LEFT,depth)
+
+            successors.insert(0,leftNew)
+
+        if zero_x != 2:
+            #take right child
+            rightTile = newRState[zero_x+1][zero_y]
+            newRState[zero_x+1][zero_y] = 0
+            newRState[zero_x][zero_y] = rightTile
+
+            cost = rightTile+root.getCost() if self.useTileWeights else 1+root.getCost()
+            rightNew = State(newRState,cost,root,Direction.RIGHT,depth)
+
+            successors.insert(0,rightNew)
+
+        if zero_y != 0:
+            #take upper child
+            upTile = newUState[zero_x][zero_y-1]
+            newUState[zero_x][zero_y-1] = 0
+            newUState[zero_x][zero_y] = upTile
+
+            cost = upTile+root.getCost() if self.useTileWeights else 1+root.getCost()
+            upNew = State(newUState,cost,root,Direction.UP,depth)
+
+            successors.insert(0,upNew)
+
+        if zero_y != 2:
+            #take lower child
+            downTile = newDState[zero_x][zero_y+1]
+            newDState[zero_x][zero_y+1] = 0
+            newDState[zero_x][zero_y] = downTile
+
+            cost = downTile+root.getCost() if self.useTileWeights else 1+root.getCost()
+            downNew = State(newDState,cost,root,Direction.DOWN,depth)
+
+            successors.insert(0,downNew)
+
+        return successors
+
+    def returnPath(self, node):
+        # creates list of dicts to use to define solution. Evrything should be in visited
+        steps = 0
+        while self.pathTree[node]['parent']:
+            steps += 1
+            self.path.insert(0, {'node':node, 'data':self.pathTree[node]})
+            node = self.pathTree[node]['parent']
+
+        self.set_steps(steps)
+
+    def get_path(self):
+        return self.path
+
+    def is_empty(self,ls):
+        return False if ls else True
+
+    def set_steps(self, steps):
+        self.steps = steps
+
+    def get_steps(self):
+        return self.steps
