@@ -1,6 +1,6 @@
 from enum import Enum
 
-# enum enumerating heuristics 
+# enum enumerating heuristics
 
 class Heuristic(Enum):
     misplaced_tiles = 0
@@ -8,3 +8,4 @@ class Heuristic(Enum):
     a_star_2 = 2
     a_star_3 = 3
     iterative_deepening = 4
+    uniform_cost = 5
