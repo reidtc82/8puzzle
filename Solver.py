@@ -6,7 +6,10 @@ from Heuristic import Heuristic
 import time
 import math
 
+# Im a bit all over the place when it comes to style and OOP-ness.
+
 class solver_iterative_deepening:
+    # Just the class
     visited = set()
     queue = []
     queue_track = set()
@@ -15,6 +18,9 @@ class solver_iterative_deepening:
     steps = 0
 
     def __init__(self, startingState, goalState, useTileWeights, heuristic):
+        # Constructor - I tried using this class for both iterative-deepening and
+        # depth-first as I did with the BFS variants but it wasnt having it. the
+        # heuristic attribute is meaningless.
         self.queue.append(startingState)
         self.queue_track.add(repr(startingState.getState()))
         self.goalState = goalState
@@ -29,16 +35,25 @@ class solver_iterative_deepening:
 
 
     def solve(self):
+        # This is the actual search. Instantiate the class then run solveself.
+        # See the SolverTester.py file.
         t0 = time.time()
         current_depth = 0
 
+        # Artifacts from trying to double dip with this class. Below would
+        # crash the thing, but baking in the ranges is fine??
         # if self.heuristic == Heuristic.iterative_deepening:
         #     self.rangeStart = range(math.factorial(9))
         # else:
         #     self.rangeStart = range(math.factorial(9)-1,math.factorial(9))
 
+        # So, baked in ranges are fine with my code but trying to change them didnt work...
+        # Basically this can be converted to DFS by setting the range to
+        # range(math.factorial(9)-1, math.factorial(9))
+        # Im not experienced enough nor do I have the time to figure it out so DFS is at the bottom
         for i in range(math.factorial(9)):
-            # print('made it here')
+            # Inside the level/depth loop
+            # Just an auto kill switch
             if time.time() - t0 > 300:
                 print('Queue length so far {0}'.format(self.maxQueueLen))
                 print('visited count so far {0}'.format(self.maxVisited))
@@ -46,26 +61,38 @@ class solver_iterative_deepening:
                 break
 
             while not self.is_empty(self.queue):
+                # Familiar main loop with a kill switch
                 if time.time() - t0 > 300:
                     print('Queue length so far {0}'.format(self.maxQueueLen))
                     print('visited count so far {0}'.format(self.maxVisited))
                     print('Iterative deepening exceeded 5 minutes. Stopping')
                     break
 
+                # Tracking max queue length for memory use reporting
                 if len(self.queue) > self.maxQueueLen:
                     self.maxQueueLen = len(self.queue)
 
+                # popping the first queued state
                 currentState = self.queue.pop(0)
+                # So... this is the result of my poor skillset
+                # Basically this algorithm was taking way too long
+                # This second queue is indexed by the string of the State
+                # because Python wont let me index by the object state
+                # It allows me to check queued faster and still maintain all the data
                 self.queue_track.remove(repr(currentState.getState()))
                 current_depth = currentState.getDepth()
 
+                # visited didnt need to data so just storing the str representation of the state
                 self.visited.add(repr(currentState.getState()))
+                # and tracking max visited
                 if self.maxVisited < len(self.visited):
                     self.maxVisited = len(self.visited)
 
+                # sanity check
                 if self.moves%1000 == 0:
                     print("Yes I'm still working current queue length: {0}".format(len(self.queue)))
 
+                # did we win?
                 if np.allclose(self.goalState.getState(), currentState.getState()):
                     print('***********end*************')
                     print('Queue length {0}'.format(self.maxQueueLen))
@@ -74,6 +101,7 @@ class solver_iterative_deepening:
                     self.returnPath(currentState)
                     break
                 elif current_depth < i:
+                # Nope, didnt win
                     for child in self.successors(currentState):
                         if not self.check_visited(child):
                             if not self.check_queue(child):
@@ -211,7 +239,7 @@ class solver_FIFO:
     pathTree = dict()
     path = []
     steps = 0
-    
+
     def __init__(self, startingState, goalState, useTileWeights, heuristic):
         self.queue.append(startingState)
         self.goalState = goalState
