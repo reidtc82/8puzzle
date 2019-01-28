@@ -98,7 +98,7 @@ class solver_FIFO:
     def __init__(self, startingState, goalState, useTileWeights, heuristic):
         # Constructor - useTileWeights and heuristic to determine which search
         # strategy to use - See Heuristic enum for options here
-        # Wonderfull, 3 hours wasted because of class scope issues... now its a late submission
+        # Wonderfull, nearly 12 hours and counting wasted because of class scope issues... now its a late submission and I dont get to sleep tonight
         self.visited = set()
         self.queue = []
         self.pathTree = dict()
