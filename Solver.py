@@ -39,20 +39,21 @@ class solver_iterative_deepening:
         for i in range(math.factorial(9)):
             # print('made it here')
             if time.time() - t0 > 300:
-                print('Queue length {0}'.format(len(self.queue)))
+                print('Queue length {0}'.format(self.maxQueueLen))
                 print('visited count {0}'.format(len(self.visited)))
                 print('Iterative deepening exceeded 5 minutes. Stopping')
                 break
 
             while not self.is_empty(self.queue):
                 if time.time() - t0 > 300:
-                    print('Queue length {0}'.format(len(self.queue)))
+                    print('Queue length {0}'.format(self.maxQueueLen))
                     print('visited count {0}'.format(len(self.visited)))
                     print('Iterative deepening exceeded 5 minutes. Stopping')
                     break
 
                 if len(self.queue) > self.maxQueueLen:
                     self.maxQueueLen = len(self.queue)
+
                 currentState = self.queue.pop(0)
                 self.queue_track.remove(repr(currentState.getState()))
                 current_depth = currentState.getDepth()
@@ -60,11 +61,11 @@ class solver_iterative_deepening:
                 self.visited.add(repr(currentState.getState()))
 
                 if self.moves%1000 == 0:
-                    print("Yes I'm still working  current queue length: {0}".format(len(self.queue)))
+                    print("Yes I'm still working current queue length: {0}".format(len(self.queue)))
 
                 if np.allclose(self.goalState.getState(), currentState.getState()):
                     print('***********end*************')
-                    print('Queue length {0}'.format(len(self.queue)))
+                    print('Queue length {0}'.format(self.maxQueueLen))
                     print('visited count {0}'.format(len(self.visited)))
                     self.win = True
                     self.returnPath(currentState)
@@ -220,7 +221,7 @@ class solver_FIFO:
         t0 = time.time()
         while len(self.queue) != 0:
             if time.time() - t0 > 300:
-                print('Queue length {0}'.format(len(self.queue)))
+                print('Queue length {0}'.format(self.maxQueueLen))
                 print('visited count {0}'.format(len(self.visited)))
                 print('FIFO - Whichever one this is - exceeded 5 minutes. Stopping')
                 break
@@ -441,7 +442,7 @@ class solver_depthFirst:
     pathTree = dict()
     path = []
     steps = 0
-    
+
     def __init__(self, startingState, goalState, useTileWeights):
         self.queue.append(startingState)
         self.queue_track.add(repr(startingState.getState()))
@@ -455,7 +456,7 @@ class solver_depthFirst:
         t0 = time.time()
         while not self.is_empty(self.queue):
             if time.time() - t0 > 300:
-                print('Queue length {0}'.format(len(self.queue)))
+                print('Queue length {0}'.format(self.maxQueueLen))
                 print('visited count {0}'.format(len(self.visited)))
                 print('DFS exceeded 5 minutes. Stopping')
                 break
@@ -471,6 +472,8 @@ class solver_depthFirst:
             self.visited.add(repr(currentState.getState()))
             if np.allclose(self.goalState.getState(), currentState.getState()):
                 print('***********end*************')
+                print('Queue length {0}'.format(self.maxQueueLen))
+                print('visited count {0}'.format(len(self.visited)))
                 self.returnPath(currentState)
                 break
             else:
