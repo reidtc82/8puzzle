@@ -2,19 +2,24 @@ import numpy as np
 from Tile import Tile
 from State import State
 
+# For the GUI
+# Class of the puzzleboard that holds the tiles
+
 class PuzzleBoard:
     tiles = [0] *9
     winningState = [0] *9
     score = 0
 
     def __init__(self):
+        # constructor
         for i in range(9):
             self.tiles[i] = i
 
-        self.easyStart = State([[1,8,7],[3,6,0],[4,2,5]],0,[])
-        self.medStart = State([[2,0,7],[8,4,6],[1,3,5]],0,[])
-        self.hardStart = State([[5,4,3],[6,0,2],[7,8,1]],0,[])
-        self.winningState = State([[1,8,7],[2,0,6],[3,4,5]],0,[])
+        # didnt get to finish making this part but setting up for intended use with the search algorithms
+        self.easyStart = State([[1,8,7],[3,6,0],[4,2,5]],0,[],None)
+        self.medStart = State([[2,0,7],[8,4,6],[1,3,5]],0,[],None)
+        self.hardStart = State([[5,4,3],[6,0,2],[7,8,1]],0,[],None)
+        self.winningState = State([[1,8,7],[2,0,6],[3,4,5]],0,[],None)
 
         # self.winningState[0] = 1
         # self.winningState[1] = 8
@@ -39,6 +44,7 @@ class PuzzleBoard:
         return self.tiles
 
     def resetPuzzle(self):
+        # resets the puzzle board to a random state
         print("Resetting tiles!")
         temp = self.tiles.ravel()
         np.random.shuffle(temp)
@@ -60,6 +66,8 @@ class PuzzleBoard:
     def setZeroLocation(self, newLoc):
         self.zero_location = newLoc
 
+    # functions to move the empty tile space
+    # these helped me model the successor function for the search algorithms
     def moveLeft(self):
         print('left')
         tempLoc = self.getZeroLocation()
@@ -128,6 +136,7 @@ class PuzzleBoard:
         if self.checkWin():
             print('Youwin!')
 
+    # did you the human win?
     def checkWin(self):
         print('current state')
         print(self.tiles)

@@ -1,3 +1,6 @@
+# Class for tile object for the GUI
+# Doesnt do much except exist
+
 class Tile:
     def __init__(self, value):
         self.value = value
