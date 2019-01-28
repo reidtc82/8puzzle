@@ -264,9 +264,10 @@ class solver_iterative_deepening:
 # These are all memory intensive really
 # They are all greedy, taking the lowest cost or heuristic cost for the next node to explore
 class solver_FIFO:
-    visited = []
+    visited = set()
     queue = []
     pathTree = dict()
+    queue_track = set()
     path = []
     steps = 0
 
@@ -274,6 +275,7 @@ class solver_FIFO:
         # Constructor - useTileWeights and heuristic to determine which search
         # strategy to use - See Heuristic enum for options here
         self.queue.append(startingState)
+        self.queue_track.add(repr(startingState.getState()))
         self.goalState = goalState
         self.useTileWeights = useTileWeights
         self.pathTree[startingState] = {'parent':startingState.getParent(), 'cost':startingState.getCost()}
@@ -294,7 +296,7 @@ class solver_FIFO:
 
             # sanity checking
             if self.moves%1000 == 0:
-                print('Yes Im still working: {0}'.format(self.moves))
+                print('Yes Im still working: {0}'.format(len(self.queue)))
 
             # tracking for reporting
             if len(self.queue) > self.maxQueueLen:
@@ -304,8 +306,9 @@ class solver_FIFO:
             # I could sort but if I jsut give it the lowest its a little faster I think
             # Sorting would take more operations, finding the lowest takes a single pass through the queue
             currentState = self.queue.pop(self.find_lowest_cost_index())
+            self.queue_track.remove(repr(currentState.getState()))
 
-            self.visited.append(currentState)
+            self.visited.add(repr(currentState.getState()))
 
             if np.allclose(self.goalState.getState(), currentState.getState()):
                 # We won
@@ -329,6 +332,7 @@ class solver_FIFO:
                                 self.pathTree[child] = {'parent':child.getParent(), 'cost':child.getCost(), 'direction':child.getDirection(), 'heuristic':child.get_h_cost()}
                             # append because breadth first. Use insert for depth first.
                             self.queue.append(child)
+                            self.queue_track.add(repr(child.getState()))
                         else:
                             # If the child was not in visitied but was in queued then we just replace the values for the object
                             # rather than add and delete stuff
@@ -354,7 +358,7 @@ class solver_FIFO:
                                             self.pathTree[q] = {'parent':q.getParent(), 'cost':q.getCost(), 'direction':q.getDirection(), 'heuristic':q.get_h_cost()}
 
                     # now we have finished visiting it
-                    self.visited.append(currentState)
+                    # self.visited.append(currentState)
 
             self.moves += 1
 
@@ -422,21 +426,22 @@ class solver_FIFO:
         return lowest
 
     def check_visited(self, child):
-        # Slow version of checking if child is in visited
+        # fast version because lots of checks
+        # see IDS for more info
         result = False
-        for v in self.visited:
-            if np.allclose(v.getState(), child.getState()):
-                result = True
-                break
+
+        if repr(child.getState()) in self.visited:
+            result = True
+
         return result
 
     def check_queue(self, child):
-        # Slow version of checking if child is in queued
+        # fast version because lots of checking
+        # see IDS because my implementation kinda sucks
         result = False
-        for cq in self.queue:
-            if np.allclose(cq.getState(), child.getState()):
-                result = True
-                break
+
+        if repr(child.getState()) in self.queue_track:
+            result = True
         return result
 
     def successors(self, root):
